@@ -972,15 +972,14 @@ create table sys_notice_read (
   read_id          bigserial        constraint pk_sys_notice_read primary key,
   notice_id        bigint           not null                   ,
   user_id          bigint           not null                   ,
-  read_time        timestamp        not null                  
+  read_time        timestamp        not null                   ,
+  constraint uk_user_notice unique (user_id, notice_id)
 );
 comment on table sys_notice_read is '公告已读记录表';
 comment on column sys_notice_read.read_id is '已读主键';
 comment on column sys_notice_read.notice_id is '公告id';
 comment on column sys_notice_read.user_id is '用户id';
 comment on column sys_notice_read.read_time is '阅读时间';
-
-create unique index uk_user_notice on sys_notice_read(user_id, notice_id);
 
 -- ----------------------------
 -- 19、代码生成业务表

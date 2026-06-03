@@ -14,8 +14,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!-- 新增已读记录 -->
     <insert id="insertNoticeRead" parameterType="SysNoticeRead">
         insert into sys_notice_read (notice_id, user_id, read_time)
-        values (#{noticeId}, #{userId}, current_timestamp)
-        on conflict on constraint uk_user_notice do nothing
+        select #{noticeId}, #{userId}, current_timestamp
+        where not exists (
+            select 1 from sys_notice_read 
+            where notice_id = #{noticeId} and user_id = #{userId}
+        )
     </insert>
 
     <!-- 查询未读数量：正常状态公告 减去 当前用户已读数 -->
@@ -50,11 +53,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!-- 批量标记已读 -->
     <insert id="insertNoticeReadBatch">
         insert into sys_notice_read (notice_id, user_id, read_time)
-        values
-        <foreach collection="noticeIds" item="noticeId" separator=",">
-            (#{noticeId}, #{userId}, current_timestamp)
-        </foreach>
-        on conflict on constraint uk_user_notice do nothing
+        select notice_id, user_id, read_time from (
+            <foreach collection="noticeIds" item="noticeId" separator="union all">
+                select #{noticeId} as notice_id, #{userId} as user_id, current_timestamp as read_time
+            </foreach>
+        ) as temp
+        where not exists (
+            select 1 from sys_notice_read r 
+            where r.notice_id = temp.notice_id and r.user_id = temp.user_id
+        )
     </insert>
 
     <!-- 删除公告时清理已读记录 -->

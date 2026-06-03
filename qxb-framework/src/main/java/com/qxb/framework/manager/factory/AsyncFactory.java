@@ -23,6 +23,7 @@ import com.qxb.system.service.ISysOperLogService;
  */
 public class AsyncFactory
 {
+    //指定一个名叫sys_user的日志
     private static final Logger sys_user_logger = LoggerFactory.getLogger("sys-user");
 
     /**
@@ -88,6 +89,7 @@ public class AsyncFactory
      */
     public static TimerTask recordOper(final SysOperLog operLog)
     {
+        //创建一个可以异步执行的任务，让Timer去后台跑
         return new TimerTask()
         {
             @Override
