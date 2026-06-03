@@ -2,13 +2,13 @@
 spring:
     datasource:
         type: com.alibaba.druid.pool.DruidDataSource
-        driverClassName: org.opengauss.Driver
+        driverClassName: org.postgresql.Driver
         druid:
             # 主库数据源
             master:
-                url: jdbc:opengauss://localhost:5432/qxb?currentSchema=public
+                url: jdbc:postgresql://localhost:5432/qxb?currentSchema=public
                 username: gaussdb
-                password: open@1234
+                password: Open@1234
             # 从库数据源
             slave:
                 # 从数据源开关/默认关闭
