@@ -146,6 +146,19 @@ xss:
   # 匹配链接
   urlPatterns: /system/*,/monitor/*,/tool/*
 
+# 短信配置
+sms:
+  # 是否启用短信功能
+  enabled: true
+  # 开发模式：验证码输出到日志，不实际发送短信
+  dev-mode: true
+  # 验证码有效期（分钟）
+  expire-minutes: 5
+  # 验证码长度
+  code-length: 6
+  # 发送间隔（秒）
+  send-interval: 60
+
 minio:
   endpoint: http://localhost:9000
   bucketName: qxb

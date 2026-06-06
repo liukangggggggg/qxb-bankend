@@ -10,8 +10,11 @@ import org.springframework.stereotype.Component;
 import com.qxb.common.constant.CacheConstants;
 import com.qxb.common.constant.Constants;
 import com.qxb.common.constant.UserConstants;
+import com.qxb.common.core.domain.entity.SysUser;
 import com.qxb.common.core.domain.model.LoginUser;
 import com.qxb.common.core.redis.RedisCache;
+import com.qxb.common.enums.SmsCodeType;
+import com.qxb.common.enums.UserStatus;
 import com.qxb.common.exception.ServiceException;
 import com.qxb.common.exception.user.BlackListException;
 import com.qxb.common.exception.user.CaptchaException;
@@ -50,6 +53,12 @@ public class SysLoginService
 
     @Autowired
     private ISysConfigService configService;
+
+    @Autowired
+    private SmsCodeService smsCodeService;
+
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService;
 
     /**
      * 登录验证
@@ -96,6 +105,45 @@ public class SysLoginService
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
         recordLoginInfo(loginUser.getUserId());
         // 生成token
+        return tokenService.createToken(loginUser);
+    }
+
+    /**
+     * 手机号验证码登录
+     *
+     * @param phone 手机号码
+     * @param smsCode 短信验证码
+     * @return token
+     */
+    public String phoneLogin(String phone, String smsCode)
+    {
+        smsCodeService.validatePhone(phone);
+        smsCodeService.verifyCode(phone, SmsCodeType.LOGIN, smsCode);
+        SysUser user = userService.selectUserByPhonenumber(phone);
+        if (StringUtils.isNull(user))
+        {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(phone, Constants.LOGIN_FAIL, MessageUtils.message("user.phone.not.bound")));
+            throw new ServiceException(MessageUtils.message("user.phone.not.bound"));
+        }
+        if (UserStatus.DELETED.getCode().equals(user.getDelFlag()))
+        {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(phone, Constants.LOGIN_FAIL, MessageUtils.message("user.password.delete")));
+            throw new ServiceException(MessageUtils.message("user.password.delete"));
+        }
+        if (UserStatus.DISABLE.getCode().equals(user.getStatus()))
+        {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(phone, Constants.LOGIN_FAIL, MessageUtils.message("user.blocked")));
+            throw new ServiceException(MessageUtils.message("user.blocked"));
+        }
+        String blackStr = configService.selectConfigByKey("sys.login.blackIPList");
+        if (IpUtils.isMatchedIp(blackStr, IpUtils.getIpAddr()))
+        {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(phone, Constants.LOGIN_FAIL, MessageUtils.message("login.blocked")));
+            throw new BlackListException();
+        }
+        AsyncManager.me().execute(AsyncFactory.recordLogininfor(user.getUserName(), Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success")));
+        LoginUser loginUser = (LoginUser) userDetailsService.createLoginUser(user);
+        recordLoginInfo(loginUser.getUserId());
         return tokenService.createToken(loginUser);
     }
 

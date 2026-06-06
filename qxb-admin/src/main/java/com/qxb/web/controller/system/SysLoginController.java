@@ -14,6 +14,7 @@ import com.qxb.common.core.domain.entity.SysMenu;
 import com.qxb.common.core.domain.entity.SysUser;
 import com.qxb.common.core.domain.model.LoginBody;
 import com.qxb.common.core.domain.model.LoginUser;
+import com.qxb.common.core.domain.model.PhoneLoginBody;
 import com.qxb.common.core.text.Convert;
 import com.qxb.common.utils.DateUtils;
 import com.qxb.common.utils.SecurityUtils;
@@ -60,6 +61,18 @@ public class SysLoginController
         // 生成令牌
         String token = loginService.login(loginBody.getUsername(), loginBody.getPassword(), loginBody.getCode(),
                 loginBody.getUuid());
+        ajax.put(Constants.TOKEN, token);
+        return ajax;
+    }
+
+    /**
+     * 手机号验证码登录
+     */
+    @PostMapping("/login/phone")
+    public AjaxResult phoneLogin(@RequestBody PhoneLoginBody phoneLoginBody)
+    {
+        AjaxResult ajax = AjaxResult.success();
+        String token = loginService.phoneLogin(phoneLoginBody.getPhone(), phoneLoginBody.getSmsCode());
         ajax.put(Constants.TOKEN, token);
         return ajax;
     }

@@ -15,7 +15,10 @@ import com.qxb.common.config.QxbConfig;
 import com.qxb.common.core.controller.BaseController;
 import com.qxb.common.core.domain.AjaxResult;
 import com.qxb.common.core.domain.entity.SysUser;
+import com.qxb.common.core.domain.model.BindPhoneBody;
 import com.qxb.common.core.domain.model.LoginUser;
+import com.qxb.common.enums.SmsCodeType;
+import com.qxb.framework.web.service.SmsCodeService;
 import com.qxb.common.enums.BusinessType;
 import com.qxb.common.utils.DateUtils;
 import com.qxb.common.utils.SecurityUtils;
@@ -40,6 +43,9 @@ public class SysProfileController extends BaseController
 
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private SmsCodeService smsCodeService;
 
     /**
      * 个人信息
@@ -66,12 +72,7 @@ public class SysProfileController extends BaseController
         SysUser currentUser = loginUser.getUser();
         currentUser.setNickName(user.getNickName());
         currentUser.setEmail(user.getEmail());
-        currentUser.setPhonenumber(user.getPhonenumber());
         currentUser.setSex(user.getSex());
-        if (StringUtils.isNotEmpty(user.getPhonenumber()) && !userService.checkPhoneUnique(currentUser))
-        {
-            return error("修改用户'" + loginUser.getUsername() + "'失败，手机号码已存在");
-        }
         if (StringUtils.isNotEmpty(user.getEmail()) && !userService.checkEmailUnique(currentUser))
         {
             return error("修改用户'" + loginUser.getUsername() + "'失败，邮箱账号已存在");
@@ -83,6 +84,33 @@ public class SysProfileController extends BaseController
             return success();
         }
         return error("修改个人信息异常，请联系管理员");
+    }
+
+    /**
+     * 绑定手机号
+     */
+    @Log(title = "绑定手机号", businessType = BusinessType.UPDATE)
+    @PutMapping("/bindPhone")
+    public AjaxResult bindPhone(@RequestBody BindPhoneBody body)
+    {
+        LoginUser loginUser = getLoginUser();
+        SysUser currentUser = loginUser.getUser();
+        smsCodeService.validatePhone(body.getPhone());
+        smsCodeService.verifyCode(body.getPhone(), SmsCodeType.BIND, body.getSmsCode());
+        SysUser checkUser = new SysUser();
+        checkUser.setUserId(currentUser.getUserId());
+        checkUser.setPhonenumber(body.getPhone());
+        if (!userService.checkPhoneUnique(checkUser))
+        {
+            return error("该手机号已被其他账号绑定");
+        }
+        currentUser.setPhonenumber(body.getPhone());
+        if (userService.updateUserProfile(currentUser) > 0)
+        {
+            tokenService.setLoginUser(loginUser);
+            return success();
+        }
+        return error("绑定手机号失败，请联系管理员");
     }
 
     /**
