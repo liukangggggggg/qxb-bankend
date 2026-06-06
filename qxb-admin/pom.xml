@@ -48,12 +48,6 @@
             <artifactId>qxb-quartz</artifactId>
         </dependency>
 
-        <!-- 代码生成-->
-        <dependency>
-            <groupId>com.qxb</groupId>
-            <artifactId>qxb-generator</artifactId>
-        </dependency>
-
     </dependencies>
 
     <build>

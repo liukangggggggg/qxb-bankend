@@ -142,12 +142,7 @@
                 <version>${qxb.version}</version>
             </dependency>
 
-            <!-- 代码生成-->
-            <dependency>
-                <groupId>com.qxb</groupId>
-                <artifactId>qxb-generator</artifactId>
-                <version>${qxb.version}</version>
-            </dependency>
+
 
             <!-- 核心模块-->
             <dependency>
@@ -191,7 +186,6 @@
         <module>qxb-framework</module>
         <module>qxb-system</module>
         <module>qxb-quartz</module>
-        <module>qxb-generator</module>
         <module>qxb-common</module>
     </modules>
     <packaging>pom</packaging>
