@@ -5,8 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
+import com.qxb.common.serializer.SensitiveJsonSerializer;
 import tools.jackson.databind.annotation.JsonSerialize;
-import com.qxb.common.config.serializer.SensitiveJsonSerializer;
 import com.qxb.common.enums.DesensitizedType;
 
 /**

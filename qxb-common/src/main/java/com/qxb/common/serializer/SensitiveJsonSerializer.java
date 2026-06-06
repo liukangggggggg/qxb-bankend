@@ -1,4 +1,4 @@
-package com.qxb.common.config.serializer;
+package com.qxb.common.serializer;
 
 import java.util.Objects;
 import tools.jackson.core.JacksonException;

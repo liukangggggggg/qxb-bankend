@@ -1,4 +1,4 @@
-package com.qxb.common.minio;
+package com.qxb.common.service;
 import com.qxb.common.core.dto.UploadResult;
 import com.qxb.common.utils.request.RequestUtils;
 import io.minio.*;
