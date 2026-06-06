@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.qxb.common.config.RuoYiConfig;
+import com.qxb.common.config.QxbConfig;
 import com.qxb.common.core.domain.AjaxResult;
 import com.qxb.common.core.domain.entity.SysUser;
 import com.qxb.common.utils.SecurityUtils;
@@ -23,7 +23,7 @@ public class SysIndexController
 {
     /** 系统基础配置 */
     @Autowired
-    private RuoYiConfig ruoyiConfig;
+    private QxbConfig ruoyiConfig;
 
     @Autowired
     private ISysUserService userService;

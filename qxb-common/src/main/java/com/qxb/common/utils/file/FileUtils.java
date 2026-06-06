@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import com.qxb.common.config.RuoYiConfig;
+import com.qxb.common.config.QxbConfig;
 import com.qxb.common.constant.Constants;
 import com.qxb.common.utils.DateUtils;
 import com.qxb.common.utils.StringUtils;
@@ -74,7 +74,7 @@ public class FileUtils
      */
     public static String writeImportBytes(byte[] data) throws IOException
     {
-        return writeBytes(data, RuoYiConfig.getImportPath());
+        return writeBytes(data, QxbConfig.getImportPath());
     }
 
     /**

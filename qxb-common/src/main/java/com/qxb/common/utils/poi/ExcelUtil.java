@@ -74,7 +74,7 @@ import com.qxb.common.annotation.Excel;
 import com.qxb.common.annotation.Excel.ColumnType;
 import com.qxb.common.annotation.Excel.Type;
 import com.qxb.common.annotation.Excels;
-import com.qxb.common.config.RuoYiConfig;
+import com.qxb.common.config.QxbConfig;
 import com.qxb.common.core.domain.AjaxResult;
 import com.qxb.common.core.text.Convert;
 import com.qxb.common.exception.UtilException;
@@ -1621,7 +1621,7 @@ public class ExcelUtil<T>
      */
     public String getAbsoluteFile(String filename)
     {
-        String downloadPath = RuoYiConfig.getDownloadPath() + filename;
+        String downloadPath = QxbConfig.getDownloadPath() + filename;
         File desc = new File(downloadPath);
         if (!desc.getParentFile().exists())
         {

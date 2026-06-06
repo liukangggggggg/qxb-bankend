@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ConfigurationProperties(prefix = "ruoyi")
-public class RuoYiConfig
+public class QxbConfig
 {
     /** 项目名称 */
     private String name;
@@ -67,7 +67,7 @@ public class RuoYiConfig
 
     public void setProfile(String profile)
     {
-        RuoYiConfig.profile = profile;
+        QxbConfig.profile = profile;
     }
 
     public static boolean isAddressEnabled()
@@ -77,7 +77,7 @@ public class RuoYiConfig
 
     public void setAddressEnabled(boolean addressEnabled)
     {
-        RuoYiConfig.addressEnabled = addressEnabled;
+        QxbConfig.addressEnabled = addressEnabled;
     }
 
     public static String getCaptchaType() {
@@ -85,7 +85,7 @@ public class RuoYiConfig
     }
 
     public void setCaptchaType(String captchaType) {
-        RuoYiConfig.captchaType = captchaType;
+        QxbConfig.captchaType = captchaType;
     }
 
     /**

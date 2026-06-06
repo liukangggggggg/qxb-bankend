@@ -145,3 +145,12 @@ xss:
   excludes: /system/notice
   # 匹配链接
   urlPatterns: /system/*,/monitor/*,/tool/*
+
+minio:
+  endpoint: http://localhost:9000
+  bucketName: qxb
+  public-endpoint: http://localhost:9000
+  access-key: admin
+  secret-key: dev@123
+
+
