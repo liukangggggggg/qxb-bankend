@@ -151,6 +151,6 @@ minio:
   bucketName: qxb
   public-endpoint: http://localhost:9000
   access-key: admin
-  secret-key: dev@123
+  secret-key: admin123
 
 

@@ -1,24 +1,16 @@
-Application Version: ${ruoyi.version}
-Spring Boot Version: ${spring-boot.version}
-////////////////////////////////////////////////////////////////////
-//                          _ooOoo_                               //
-//                         o8888888o                              //
-//                         88" . "88                              //
-//                         (| ^_^ |)                              //
-//                         O\  =  /O                              //
-//                      ____/`---'\____                           //
-//                    .'  \\|     |//  `.                         //
-//                   /  \\|||  :  |||//  \                        //
-//                  /  _||||| -:- |||||-  \                       //
-//                  |   | \\\  -  /// |   |                       //
-//                  | \_|  ''\---/''  |   |                       //
-//                  \  .-\__  `-`  ___/-. /                       //
-//                ___`. .'  /--.--\  `. . ___                     //
-//              ."" '<  `.___\_<|>_/___.'  >'"".                  //
-//            | | :  `- \`.;`\ _ /`;.`/ - ` : | |                 //
-//            \  \ `-.   \_ __\ /__ _/   .-` /  /                 //
-//      ========`-.____`-.___\_____/___.-`____.-'========         //
-//                           `=---='                              //
-//      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        //
-//             佛祖保佑       永不宕机      永无BUG               //
-////////////////////////////////////////////////////////////////////
+${AnsiColor.CYAN}Application Version: ${ruoyi.version}${AnsiColor.DEFAULT}
+${AnsiColor.CYAN}Spring Boot Version: ${spring-boot.version}${AnsiColor.DEFAULT}
+${AnsiColor.BRIGHT_CYAN}╔═══════════════════════════════════════════════════════════════════╗
+║                                                                   ║
+║   ${AnsiColor.BRIGHT_GREEN}██████╗ ██╗  ██╗██████╗${AnsiColor.BRIGHT_CYAN}      ${AnsiColor.BRIGHT_YELLOW}███████╗██╗   ██╗███████╗████████╗${AnsiColor.BRIGHT_CYAN} ║
+║   ${AnsiColor.BRIGHT_GREEN}██╔═══██╗╚██╗██╔╝██╔══██╗${AnsiColor.BRIGHT_CYAN}     ${AnsiColor.BRIGHT_YELLOW}██╔════╝╚██╗ ██╔╝██╔════╝╚══██╔══╝${AnsiColor.BRIGHT_CYAN} ║
+║   ${AnsiColor.BRIGHT_GREEN}██║   ██║ ╚███╔╝ ██████╔╝${AnsiColor.BRIGHT_CYAN}     ${AnsiColor.BRIGHT_YELLOW}███████╗ ╚████╔╝ ███████╗   ██║${AnsiColor.BRIGHT_CYAN}    ║
+║   ${AnsiColor.BRIGHT_GREEN}██║▄▄██║ ██╔██╗ ██╔══██╗${AnsiColor.BRIGHT_CYAN}     ${AnsiColor.BRIGHT_YELLOW}╚════██║  ╚██╔╝  ╚════██║   ██║${AnsiColor.BRIGHT_CYAN}    ║
+║   ${AnsiColor.BRIGHT_GREEN}╚██████╔╝██╔╝ ██╗██████╔╝${AnsiColor.BRIGHT_CYAN}     ${AnsiColor.BRIGHT_YELLOW}███████║   ██║   ███████║   ██║${AnsiColor.BRIGHT_CYAN}    ║
+║    ${AnsiColor.BRIGHT_GREEN}╚══▀▀═╝ ╚═╝  ╚═╝╚═════╝${AnsiColor.BRIGHT_CYAN}      ${AnsiColor.BRIGHT_YELLOW}╚══════╝   ╚═╝   ╚══════╝   ╚═╝${AnsiColor.BRIGHT_CYAN}    ║
+║                                                                   ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝${AnsiColor.DEFAULT}
+${AnsiColor.BRIGHT_GREEN}>>>>>>>>>>>>>>>>> ${AnsiColor.BRIGHT_CYAN}QXB 系统启动${AnsiColor.BRIGHT_GREEN} >>>>>>>>>>>>>>>>>>>>>>>>>${AnsiColor.DEFAULT}
+${AnsiColor.BRIGHT_YELLOW}⚙️  初始化中...${AnsiColor.DEFAULT}
+${AnsiColor.BRIGHT_GREEN}>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>${AnsiColor.DEFAULT}
