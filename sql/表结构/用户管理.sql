@@ -117,6 +117,7 @@ CREATE TABLE "public"."qxb_parent_child" (
                                              "bind_time" timestamp(6) DEFAULT NULL,
                                              "create_time" timestamp(6) DEFAULT pg_systimestamp(),
                                              CONSTRAINT "pk_qxb_parent_child" PRIMARY KEY ("relation_id")
+
 )
     WITH (orientation=ROW)
     DISTRIBUTE BY HASH("parent_user_id");
