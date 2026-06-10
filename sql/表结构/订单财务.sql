@@ -1,7 +1,7 @@
 -- =============================================================================
 -- 一、 创建订单与财务模块全局序列 (消灭表级锁，支持高并发轻量级内存发号)
 -- =============================================================================
-CREATE SEQUENCE "public"."seq_sys_order_id" INCREMENT 1 START 1000000;
+CREATE SEQUENCE "public"."seq_qxb_order_id" INCREMENT 1 START 1000000;
 CREATE SEQUENCE "public"."seq_fin_account_id" INCREMENT 1 START 100000;
 CREATE SEQUENCE "public"."seq_fin_split_id" INCREMENT 1 START 100000;
 CREATE SEQUENCE "public"."seq_fin_ledger_id" INCREMENT 1 START 100000;
@@ -11,9 +11,9 @@ CREATE SEQUENCE "public"."seq_fin_ledger_id" INCREMENT 1 START 100000;
 -- 二、 订单中心核心表 (处理高并发下单业务与状态机流转)
 -- =============================================================================
 
--- 1. 订单主表 (sys_order)
-CREATE TABLE "public"."sys_order" (
-                                      "order_id" int8 NOT NULL DEFAULT nextval('seq_sys_order_id'::regclass),
+-- 1. 订单主表 (qxb_order)
+CREATE TABLE "public"."qxb_order" (
+                                      "order_id" int8 NOT NULL DEFAULT nextval('seq_qxb_order_id'::regclass),
                                       "order_sn" varchar(32) NOT NULL,
                                       "tenant_id" int8 NOT NULL,
                                       "user_id" int8 NOT NULL,
@@ -27,32 +27,32 @@ CREATE TABLE "public"."sys_order" (
                                       "pay_time" timestamp(6) DEFAULT NULL,
                                       "create_time" timestamp(6) DEFAULT pg_systimestamp(),
                                       "cancel_time" timestamp(6) DEFAULT NULL,
-                                      CONSTRAINT "pk_sys_order" PRIMARY KEY ("order_id")
+                                      CONSTRAINT "pk_qxb_order" PRIMARY KEY ("order_id")
 ) WITH (orientation=ROW, storetype=ustore) DISTRIBUTE BY HASH("user_id");
 
 -- 黄金唯一索引：部分索引（Partial Index）技术
 -- 1. 物理层100%封死“同一个咨询排班时段被两个人同时买单抢占”的高并发冲突Bug；
 -- 2. 自动排除已取消的失效订单，允许用户取消后重新对该业务下单。
-CREATE UNIQUE INDEX "uk_order_business" ON "public"."sys_order" ("business_type", "business_id") WHERE "pay_status" != '2';
+CREATE UNIQUE INDEX "uk_order_business" ON "public"."qxb_order" ("business_type", "business_id") WHERE "pay_status" != '2';
 -- 通用查询索引：加速多APP端用户调取“我的订单列表”以及机构后台审计
-CREATE INDEX "idx_order_user_tenant" ON "public"."sys_order" ("user_id", "tenant_id", "create_time");
+CREATE INDEX "idx_order_user_tenant" ON "public"."qxb_order" ("user_id", "tenant_id", "create_time");
 
 -- 表及字段全注释（严格适配openGauss全路径点路径语法）
-COMMENT ON TABLE "public"."sys_order" IS '订单主表 (负责业务流转与支付状态控制，解耦具体商品属性)';
-COMMENT ON COLUMN "public"."sys_order"."order_id" IS '订单内部分值自增ID';
-COMMENT ON COLUMN "public"."sys_order"."order_sn" IS '对外暴露的商户唯一订单号 (用于配合微信/支付宝对账，如: SN2026xxxx)';
-COMMENT ON COLUMN "public"."sys_order"."tenant_id" IS '所属机构租户ID (0代表平台公共大厅/独立专家的全网公共订单)';
-COMMENT ON COLUMN "public"."sys_order"."user_id" IS '下单人的全局用户UID (关联sys_user.user_id)';
-COMMENT ON COLUMN "public"."sys_order"."business_type" IS '关联的业务商品类型 (appointment:咨询预约, scale:付费量表, course:心理课程)';
-COMMENT ON COLUMN "public"."sys_order"."business_id" IS '具体关联的业务主键ID (如具体哪一笔预约记录ID，或具体的量表配置ID)';
-COMMENT ON COLUMN "public"."sys_order"."total_amount" IS '订单原始应付总金额';
-COMMENT ON COLUMN "public"."sys_order"."pay_amount" IS '用户实际实付总金额';
-COMMENT ON COLUMN "public"."sys_order"."pay_status" IS '支付状态 (0-待支付, 1-已支付, 2-已取消, 3-已退款)';
-COMMENT ON COLUMN "public"."sys_order"."pay_type" IS '支付通道渠道 (wechat_pay:微信支付, ali_pay:支付宝, apple_pay:苹果内购)';
-COMMENT ON COLUMN "public"."sys_order"."out_trade_no" IS '第三方支付平台返回的外部底层流水号/微信官方单号';
-COMMENT ON COLUMN "public"."sys_order"."pay_time" IS '用户完成支付的精确时间';
-COMMENT ON COLUMN "public"."sys_order"."create_time" IS '用户点击提交、生成订单的时间';
-COMMENT ON COLUMN "public"."sys_order"."cancel_time" IS '订单关闭或超时未支付自动取消的时间';
+COMMENT ON TABLE "public"."qxb_order" IS '订单主表 (负责业务流转与支付状态控制，解耦具体商品属性)';
+COMMENT ON COLUMN "public"."qxb_order"."order_id" IS '订单内部分值自增ID';
+COMMENT ON COLUMN "public"."qxb_order"."order_sn" IS '对外暴露的商户唯一订单号 (用于配合微信/支付宝对账，如: SN2026xxxx)';
+COMMENT ON COLUMN "public"."qxb_order"."tenant_id" IS '所属机构租户ID (0代表平台公共大厅/独立专家的全网公共订单)';
+COMMENT ON COLUMN "public"."qxb_order"."user_id" IS '下单人的全局用户UID (关联qxb_user.user_id)';
+COMMENT ON COLUMN "public"."qxb_order"."business_type" IS '关联的业务商品类型 (appointment:咨询预约, scale:付费量表, course:心理课程)';
+COMMENT ON COLUMN "public"."qxb_order"."business_id" IS '具体关联的业务主键ID (如具体哪一笔预约记录ID，或具体的量表配置ID)';
+COMMENT ON COLUMN "public"."qxb_order"."total_amount" IS '订单原始应付总金额';
+COMMENT ON COLUMN "public"."qxb_order"."pay_amount" IS '用户实际实付总金额';
+COMMENT ON COLUMN "public"."qxb_order"."pay_status" IS '支付状态 (0-待支付, 1-已支付, 2-已取消, 3-已退款)';
+COMMENT ON COLUMN "public"."qxb_order"."pay_type" IS '支付通道渠道 (wechat_pay:微信支付, ali_pay:支付宝, apple_pay:苹果内购)';
+COMMENT ON COLUMN "public"."qxb_order"."out_trade_no" IS '第三方支付平台返回的外部底层流水号/微信官方单号';
+COMMENT ON COLUMN "public"."qxb_order"."pay_time" IS '用户完成支付的精确时间';
+COMMENT ON COLUMN "public"."qxb_order"."create_time" IS '用户点击提交、生成订单的时间';
+COMMENT ON COLUMN "public"."qxb_order"."cancel_time" IS '订单关闭或超时未支付自动取消的时间';
 
 
 -- =============================================================================
@@ -103,7 +103,7 @@ CREATE INDEX "idx_split_party_lookup" ON "public"."fin_order_split" ("party_type
 
 COMMENT ON TABLE "public"."fin_order_split" IS '订单多方分账明细表 (清算引擎拆账分成结算的底层逻辑数据核心)';
 COMMENT ON COLUMN "public"."fin_order_split"."split_id" IS '分账分成流水自增ID';
-COMMENT ON COLUMN "public"."fin_order_split"."order_id" IS '关联的订单主表ID (关联sys_order.order_id)';
+COMMENT ON COLUMN "public"."fin_order_split"."order_id" IS '关联的订单主表ID (关联qxb_order.order_id)';
 COMMENT ON COLUMN "public"."fin_order_split"."party_type" IS '参与本次分账分成利益方 (1-平台官方/公共自营大厅, 2-加盟连锁机构租户, 3-咨询师专家个人UID)';
 COMMENT ON COLUMN "public"."fin_order_split"."party_id" IS '对应的利益方标识 (分别存储：0、租户ID、或用户个人user_id)';
 COMMENT ON COLUMN "public"."fin_order_split"."split_ratio" IS '分成比例快照记录 (如 15.50 代表本订单对该利益方抽成 15.5%)';

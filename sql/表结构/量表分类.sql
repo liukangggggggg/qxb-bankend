@@ -17,7 +17,7 @@ CREATE TABLE "public"."scale_category" (
                                            "icon" varchar(255) DEFAULT ''::character varying,
                                            "sort_order" int4 DEFAULT 0,
                                            "status" char(1) DEFAULT '1'::bpchar,
-                                           "create_time" timestamp(6) DEFAULT pg_systimestamp(),
+                                           "create_time" timestamp(6) DEFAULT sys_qxbtimestamp(),
                                            CONSTRAINT "pk_scale_category" PRIMARY KEY ("id")
 ) WITH (orientation=ROW) DISTRIBUTE BY HASH("id");
 

@@ -24,24 +24,24 @@ COMMENT ON COLUMN "public"."course"."status" IS '课程上架状态 (0-下架, 1
 
 
 -- =============================================================================
--- 表十八：用户购买课程记录表 (sys_user_course) ── 【核心：这就是订单对应的业务表！】
+-- 表十八：用户购买课程记录表 (qxb_user_course) ── 【核心：这就是订单对应的业务表！】
 -- =============================================================================
-CREATE TABLE "public"."sys_user_course" (
+CREATE TABLE "public"."qxb_user_course" (
                                             "user_course_id" int8 NOT NULL DEFAULT nextval('seq_user_course_id'::regclass),
                                             "user_id" int8 NOT NULL,
                                             "course_id" int8 NOT NULL,
                                             "learn_progress" int4 DEFAULT 0,
                                             "lock_status" char(1) DEFAULT '0'::bpchar,
                                             "create_time" timestamp(6) DEFAULT pg_systimestamp(),
-                                            CONSTRAINT "pk_sys_user_course" PRIMARY KEY ("user_course_id")
+                                            CONSTRAINT "pk_qxb_user_course" PRIMARY KEY ("user_course_id")
 ) WITH (orientation=ROW, storetype=ustore) DISTRIBUTE BY HASH("user_id"); -- 跟着用户走
 
 -- 核心联合唯一索引：物理层锁死“同一个用户对同一门课重复购买”的Bug
-CREATE UNIQUE INDEX "uk_user_course" ON "public"."sys_user_course" ("user_id", "course_id");
+CREATE UNIQUE INDEX "uk_user_course" ON "public"."qxb_user_course" ("user_id", "course_id");
 
-COMMENT ON TABLE "public"."sys_user_course" IS '用户购买课程记录表 (订单最终指向的、证明用户拥有该课的业务凭证表)';
-COMMENT ON COLUMN "public"."sys_user_course"."user_course_id" IS '用户课程关系唯一主键 (对应sys_order.business_id)';
-COMMENT ON COLUMN "public"."sys_user_course"."user_id" IS '购买课程的用户全局UID (关联sys_user.user_id)';
-COMMENT ON COLUMN "public"."sys_user_course"."course_id" IS '所购买的课程配置ID (关联course.id)';
-COMMENT ON COLUMN "public"."sys_user_course"."learn_progress" IS '该用户在这门课下的学习进度百分比 (0-100)';
-COMMENT ON COLUMN "public"."sys_user_course"."lock_status" IS '该课程购买凭证状态 (0-正常解锁可看, 1-因退款或违规强行锁死冻结)';
+COMMENT ON TABLE "public"."qxb_user_course" IS '用户购买课程记录表 (订单最终指向的、证明用户拥有该课的业务凭证表)';
+COMMENT ON COLUMN "public"."qxb_user_course"."user_course_id" IS '用户课程关系唯一主键 (对应qxb_order.business_id)';
+COMMENT ON COLUMN "public"."qxb_user_course"."user_id" IS '购买课程的用户全局UID (关联qxb_user.user_id)';
+COMMENT ON COLUMN "public"."qxb_user_course"."course_id" IS '所购买的课程配置ID (关联course.id)';
+COMMENT ON COLUMN "public"."qxb_user_course"."learn_progress" IS '该用户在这门课下的学习进度百分比 (0-100)';
+COMMENT ON COLUMN "public"."qxb_user_course"."lock_status" IS '该课程购买凭证状态 (0-正常解锁可看, 1-因退款或违规强行锁死冻结)';

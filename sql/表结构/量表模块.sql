@@ -42,7 +42,6 @@ COMMENT ON COLUMN "public"."scale"."create_time" IS '量表创建时间';
 -- 2. 公共因子表 (scale_factor)
 CREATE TABLE "public"."scale_factor" (
                                          "id" int8 NOT NULL DEFAULT nextval('seq_scale_factor_id'::regclass),
-                                         "scale_id" int8 NOT NULL,
                                          "parent_id" int8 DEFAULT 0,
                                          "name" varchar(50) NOT NULL,
                                          "code" varchar(10) DEFAULT ''::character varying,
@@ -55,8 +54,7 @@ CREATE INDEX "idx_factor_scale_id" ON "public"."scale_factor" ("scale_id");
 
 COMMENT ON TABLE "public"."scale_factor" IS '公共因子维度表 (支持树形大因子/小因子结构)';
 COMMENT ON COLUMN "public"."scale_factor"."id" IS '因子维度唯一自增ID';
-COMMENT ON COLUMN "public"."scale_factor"."scale_id" IS '所属量表主表ID';
-COMMENT ON COLUMN "public"."scale_factor"."parent_id" IS '父因子ID (0表示顶层大因子，非0表示下属子维度)';
+COMMENT ON COLUMN "public"."scale_factor"."parent_id" IS '上级因子ID (0表示顶层大因子，非0表示下属子维度)';
 COMMENT ON COLUMN "public"."scale_factor"."name" IS '因子名称 (如: 躯体化、人际关系敏感、焦虑倾向)';
 COMMENT ON COLUMN "public"."scale_factor"."code" IS '因子代码/缩写 (用于报告公式计算，如: som, anx)';
 COMMENT ON COLUMN "public"."scale_factor"."create_time" IS '创建时间';
