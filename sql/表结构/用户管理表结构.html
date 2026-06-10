@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理模块 - 表结构与关系图</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            position: relative;
+        }
+        .card-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        /* 表格样式 */
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        th {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            font-weight: 600;
+            color: #495057;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .table-caption {
+            font-weight: 500;
+            color: #666;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+        /* Mermaid 图表容器 */
+        .mermaid-container {
+            background: #2c3e50;
+            border-radius: 12px;
+            padding: 30px;
+            overflow-x: auto;
+        }
+        /* 关系说明 */
+        .relation-list {
+            list-style: none;
+        }
+        .relation-list li {
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .relation-list li:last-child {
+            margin-bottom: 0;
+        }
+        /* 序列信息 */
+        .sequence-box {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 15px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            color: #2e7d32;
+        }
+        .footer {
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+            font-size: 14px;
+            margin-top: 40px;
+        }
+        /* 响应式 */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+            header h1 {
+                font-size: 24px;
+            }
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>用户管理模块</h1>
+            <p>表结构设计与关系图谱</p>
+        </header>
+
+        <!-- 全局序列 -->
+        <div class="card">
+            <h2 class="card-title">全局序列定义</h2>
+            <div class="sequence-box">seq_qxb_user_id - 用户ID序列 (起始: 10000)</div>
+            <div class="sequence-box">seq_qxb_user_auth_id - 认证记录ID序列 (起始: 1)</div>
+            <div class="sequence-box">seq_qxb_parent_child_id - 亲子关系ID序列 (起始: 1)</div>
+        </div>
+
+        <!-- 表结构 -->
+        <div class="card">
+            <h2 class="card-title">表结构详情</h2>
+
+            <!-- 用户核心主体表 -->
+            <div class="table-container">
+                <div class="table-caption">📋 qxb_user - 用户核心主体表</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>字段名</th>
+                            <th>类型</th>
+                            <th>默认值</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>user_id</td><td>int8</td><td>nextval(seq_qxb_user_id)</td><td>全局唯一用户ID (主键)</td></tr>
+                        <tr><td>nick_name</td><td>varchar(30)</td><td>-</td><td>用户昵称</td></tr>
+                        <tr><td>avatar</td><td>varchar(255)</td><td>空字符串</td><td>用户头像URL地址</td></tr>
+                        <tr><td>sex</td><td>char(1)</td><td>'0'</td><td>性别 (0男 1女 2未知)</td></tr>
+                        <tr><td>birthday</td><td>date</td><td>NULL</td><td>出生日期</td></tr>
+                        <tr><td>status</td><td>char(1)</td><td>'0'</td><td>账号状态 (0正常 1停用)</td></tr>
+                        <tr><td>del_flag</td><td>char(1)</td><td>'0'</td><td>逻辑删除标志 (0存在 2删除)</td></tr>
+                        <tr><td>create_by</td><td>varchar(64)</td><td>空字符串</td><td>创建者账号/ID</td></tr>
+                        <tr><td>create_time</td><td>timestamp(6)</td><td>pg_systimestamp()</td><td>账号创建时间</td></tr>
+                        <tr><td>update_by</td><td>varchar(64)</td><td>空字符串</td><td>更新者账号/ID</td></tr>
+                        <tr><td>update_time</td><td>timestamp(6)</td><td>NULL</td><td>最后更新时间</td></tr>
+                        <tr><td>remark</td><td>varchar(500)</td><td>NULL</td><td>备注信息</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <br><br>
+
+            <!-- 多端登录认证表 -->
+            <div class="table-container">
+                <div class="table-caption">🔐 qxb_user_auth - 多端登录凭证表</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>字段名</th>
+                            <th>类型</th>
+                            <th>默认值</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>auth_id</td><td>int8</td><td>nextval(seq_qxb_user_auth_id)</td><td>凭证记录自增ID (主键)</td></tr>
+                        <tr><td>user_id</td><td>int8</td><td>-</td><td>关联用户主体表的user_id</td></tr>
+                        <tr><td>identity_type</td><td>varchar(20)</td><td>-</td><td>认证渠道类型</td></tr>
+                        <tr><td>identifier</td><td>varchar(100)</td><td>-</td><td>唯一通道标识</td></tr>
+                        <tr><td>union_id</td><td>varchar(100)</td><td>NULL</td><td>微信开放平台唯一标识</td></tr>
+                        <tr><td>credential</td><td>varchar(255)</td><td>空字符串</td><td>凭证内容</td></tr>
+                        <tr><td>login_ip</td><td>varchar(128)</td><td>空字符串</td><td>最后登录IP</td></tr>
+                        <tr><td>login_date</td><td>timestamp(6)</td><td>NULL</td><td>最后登录时间</td></tr>
+                        <tr><td>create_time</td><td>timestamp(6)</td><td>pg_systimestamp()</td><td>绑定创建时间</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <br><br>
+
+            <!-- 机构用户关系表 -->
+            <div class="table-container">
+                <div class="table-caption">🏢 qxb_tenant_user - 机构用户关系表</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>字段名</th>
+                            <th>类型</th>
+                            <th>默认值</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>tenant_id</td><td>int8</td><td>-</td><td>机构ID (联合主键)</td></tr>
+                        <tr><td>user_id</td><td>int8</td><td>-</td><td>用户ID (联合主键)</td></tr>
+                        <tr><td>dept_id</td><td>int8</td><td>NULL</td><td>所属部门/科室ID</td></tr>
+                        <tr><td>user_type</td><td>varchar(2)</td><td>'01'</td><td>身份类型</td></tr>
+                        <tr><td>tenant_status</td><td>char(1)</td><td>'0'</td><td>机构内状态 (0正常 1冻结)</td></tr>
+                        <tr><td>binding_time</td><td>timestamp(6)</td><td>pg_systimestamp()</td><td>首次关联时间</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <br><br>
+
+            <!-- 亲子绑定关系表 -->
+            <div class="table-container">
+                <div class="table-caption">👨‍👩‍👧 qxb_parent_child - 亲子绑定关系表</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>字段名</th>
+                            <th>类型</th>
+                            <th>默认值</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>relation_id</td><td>int8</td><td>nextval(seq_qxb_parent_child_id)</td><td>关系自增主键</td></tr>
+                        <tr><td>parent_user_id</td><td>int8</td><td>-</td><td>家长用户UID</td></tr>
+                        <tr><td>child_user_id</td><td>int8</td><td>-</td><td>孩子用户UID</td></tr>
+                        <tr><td>relation_type</td><td>char(1)</td><td>'1'</td><td>监护类型 (1父亲 2母亲 3其他)</td></tr>
+                        <tr><td>auth_status</td><td>char(1)</td><td>'0'</td><td>审核状态 (0待确认 1已绑定 2已拒绝)</td></tr>
+                        <tr><td>bind_time</td><td>timestamp(6)</td><td>NULL</td><td>绑定生效时间</td></tr>
+                        <tr><td>create_time</td><td>timestamp(6)</td><td>pg_systimestamp()</td><td>申请时间</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 关系图 -->
+        <div class="card">
+            <h2 class="card-title">表关系图</h2>
+            <div class="mermaid-container">
+                <div class="mermaid">
+                    erDiagram
+                        qxb_user ||--o{ qxb_user_auth : "1:N"
+                        qxb_user ||--o{ qxb_tenant_user : "1:N"
+                        qxb_user ||--o{ qxb_parent_child : "parent"
+                        qxb_user ||--o{ qxb_parent_child : "child"
+
+                        qxb_user {
+                            int8 user_id PK
+                            varchar nick_name
+                            varchar avatar
+                            char sex
+                            date birthday
+                            char status
+                            char del_flag
+                        }
+
+                        qxb_user_auth {
+                            int8 auth_id PK
+                            int8 user_id FK
+                            varchar identity_type
+                            varchar identifier
+                            varchar union_id
+                        }
+
+                        qxb_tenant_user {
+                            int8 tenant_id PK
+                            int8 user_id PK,FK
+                            int8 dept_id
+                            varchar user_type
+                            char tenant_status
+                        }
+
+                        qxb_parent_child {
+                            int8 relation_id PK
+                            int8 parent_user_id FK
+                            int8 child_user_id FK
+                            char relation_type
+                            char auth_status
+                        }
+                </div>
+            </div>
+        </div>
+
+        <!-- 关系说明 -->
+        <div class="card">
+            <h2 class="card-title">关系说明</h2>
+            <ul class="relation-list">
+                <li><strong>用户与认证</strong>：一个用户可以拥有多个登录渠道（密码、手机验证码、微信小程序等），通过 <code>user_id</code> 关联实现多端登录</li>
+                <li><strong>用户与机构</strong>：用户可以加入多个机构，形成多对多关系。<code>qxb_tenant_user</code> 作为中间表存储用户在各机构的身份和状态</li>
+                <li><strong>亲子关系</strong>：通过 <code>parent_user_id</code> 和 <code>child_user_id</code> 分别关联到 <code>qxb_user</code>，支持家长与孩子的双向绑定</li>
+                <li><strong>全局唯一ID</strong>：<code>user_id</code> 作为全系统业务追踪核心，确保跨机构、跨端的用户身份一致性</li>
+            </ul>
+        </div>
+
+        <footer class="footer">
+            <p>用户管理模块 · 表结构设计文档</p>
+        </footer>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#667eea',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#667eea',
+                lineColor: '#e0e0e0',
+                secondaryColor: '#764ba2',
+                tertiaryColor: '#4caf50'
+            }
+        });
+    </script>
+</body>
+</html>
