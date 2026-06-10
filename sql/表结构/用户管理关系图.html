@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理模块 - 数据库关系图</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .header p { font-size: 16px; opacity: 0.9; }
+        .content { padding: 40px; }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .card h3 { color: #667eea; font-size: 16px; margin-bottom: 8px; }
+        .card p { color: #555; line-height: 1.7; font-size: 14px; }
+        .card p strong { color: #333; }
+        .diagram-wrapper {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        .diagram-container {
+            overflow: auto;
+            cursor: grab;
+            user-select: none;
+        }
+        .diagram-container:active { cursor: grabbing; }
+        .diagram-content {
+            transform-origin: 0 0;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+        .legend {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .legend h3 { color: #333; margin-bottom: 15px; }
+        .legend-items { display: flex; gap: 20px; flex-wrap: wrap; }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            background: white;
+            border-radius: 6px;
+            gap: 10px;
+        }
+        .legend-symbol {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-weight: bold;
+            color: white;
+        }
+        .pk { background: #667eea; }
+        .fk { background: #51cf66; }
+        .legend-text { font-size: 14px; color: #555; }
+        .zoom-controls {
+            position: fixed;
+            right: 30px;
+            bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+        .zoom-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .zoom-btn:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6); }
+        .zoom-btn:active { transform: scale(0.95); }
+        .zoom-reset { font-size: 14px; height: 40px; border-radius: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>用户管理模块 - 数据库关系图</h1>
+            <p>多端统一身份认证 + 多机构灵活权限隔离 + 亲子关系链管理 + RBAC权限模型</p>
+        </div>
+        <div class="content">
+            <div class="cards">
+                <div class="card">
+                    <h3>1. 用户核心主体表 (qxb_user)</h3>
+                    <p><strong>场景：</strong>全系统唯一的用户身份底座，user_id 贯穿咨询、测评、课程、订单等所有业务模块。</p>
+                    <p><strong>实现：</strong>序列自增从10000开始，逻辑删除(del_flag) + 全局状态(status)控制，停用后全端全机构均无法登录。</p>
+                </div>
+                <div class="card">
+                    <h3>2. 多端登录认证表 (qxb_user_auth)</h3>
+                    <p><strong>场景：</strong>支持账号密码、手机验证码、微信小程序等多种登录方式，union_id 实现跨端融合。</p>
+                    <p><strong>实现：</strong>identity_type + identifier 唯一索引防止重复绑定，credential 存密码哈希，免密登录时为NULL。</p>
+                </div>
+                <div class="card">
+                    <h3>3. 机构信息表 (qxb_tenant)</h3>
+                    <p><strong>场景：</strong>多租户架构的机构定义底座，补齐此前 tenant_id 无主表的缺失。</p>
+                    <p><strong>实现：</strong>tenant_code 唯一编码，含联系人、地址等完整信息，与 tenant_user 形成一对多父-子关系。</p>
+                </div>
+                <div class="card">
+                    <h3>4. 机构用户关系表 (qxb_tenant_user)</h3>
+                    <p><strong>场景：</strong>用户与机构多对多关系，同一用户在不同机构可拥有不同身份和独立状态。</p>
+                    <p><strong>实现：</strong>(tenant_id, user_id) 联合主键，user_type 区分身份(来访者/咨询师/管理员)，tenant_status 机构内独立状态控制。</p>
+                </div>
+                <div class="card">
+                    <h3>5. 亲子绑定关系表 (qxb_parent_child)</h3>
+                    <p><strong>场景：</strong>家长绑定孩子，可为孩子预约咨询、查看测评报告，审核机制保证安全性。</p>
+                    <p><strong>实现：</strong>parent_user_id + child_user_id 唯一索引防重复，relation_type 区分监护关系，auth_status 控制绑定流程。</p>
+                </div>
+                <div class="card">
+                    <h3>6. 角色信息表 (sys_role)</h3>
+                    <p><strong>场景：</strong>定义系统角色（超级管理员、普通角色等），统一管理菜单权限和数据权限。</p>
+                    <p><strong>实现：</strong>role_key 作为权限字符串用于代码判断，data_scope 定义数据范围，支持菜单/部门树关联显示控制。</p>
+                </div>
+                <div class="card">
+                    <h3>7. 用户角色关联表 (sys_user_role)</h3>
+                    <p><strong>场景：</strong>建立 sys_user 与 sys_role 的多对多关系，实现灵活的角色权限分配。</p>
+                    <p><strong>实现：</strong>(user_id, role_id) 联合主键防重复分配，支持批量授权和权限回收，构建完整 RBAC 权限模型。</p>
+                </div>
+            </div>
+
+            <div class="diagram-wrapper">
+                <div class="diagram-container" id="diagramContainer">
+                    <div class="diagram-content" id="diagramContent">
+                        <div class="mermaid">
+erDiagram
+    qxb_tenant ||--o{ qxb_tenant_user : "一个机构可拥有多个用户成员"
+    qxb_user ||--o{ qxb_user_auth : "一个用户可有多个登录方式"
+    qxb_user ||--o{ qxb_tenant_user : "一个用户可属于多个机构"
+    qxb_user ||--o{ qxb_parent_child : "作为家长绑定多个孩子"
+    qxb_user ||--o{ qxb_parent_child : "作为孩子被多个家长绑定"
+    qxb_user ||--o{ sys_user_role : "一个用户可拥有多个角色"
+    sys_role ||--o{ sys_user_role : "一个角色可分配给多个用户"
+
+    qxb_user {
+        int8 user_id PK "全局唯一用户ID"
+        varchar nick_name "用户昵称"
+        varchar avatar "用户头像URL"
+        char sex "性别(0男1女2未知)"
+        date birthday "出生日期"
+        char status "账号状态(0正常1停用)"
+        char del_flag "逻辑删除(0存在2删除)"
+        varchar create_by "创建者"
+        timestamp create_time "创建时间"
+        varchar update_by "更新者"
+        timestamp update_time "更新时间"
+        varchar remark "备注"
+    }
+
+    qxb_user_auth {
+        int8 auth_id PK "凭证记录自增ID"
+        int8 user_id FK "关联用户主体表的user_id"
+        varchar identity_type "登录类型(password/phone/wechat_mp)"
+        varchar identifier "唯一标识(用户名/手机号/OpenID)"
+        varchar union_id "微信UnionID(跨端融合)"
+        varchar credential "登录凭证(密码哈希)"
+        varchar login_ip "最后登录IP"
+        timestamp login_date "最后登录时间"
+        timestamp create_time "绑定创建时间"
+    }
+
+    qxb_tenant {
+        int8 tenant_id PK "机构唯一ID"
+        varchar tenant_code UK "机构编码"
+        varchar tenant_name "机构全称"
+        varchar logo "机构Logo URL"
+        varchar contact_person "联系人姓名"
+        varchar contact_phone "联系电话"
+        varchar contact_email "联系邮箱"
+        varchar province "所在省份"
+        varchar city "所在城市"
+        varchar district "所在区县"
+        varchar address "详细地址"
+        varchar intro "机构简介"
+        char status "状态(0正常1停用)"
+        char del_flag "逻辑删除(0存在2删除)"
+        varchar create_by "创建者"
+        timestamp create_time "创建时间"
+        varchar update_by "更新者"
+        timestamp update_time "更新时间"
+        varchar remark "备注"
+    }
+
+    qxb_tenant_user {
+        int8 tenant_id PK "机构ID"
+        int8 user_id PK "用户ID"
+        int8 dept_id "部门/科室ID"
+        varchar user_type "身份类型(01来访者02咨询师03管理员)"
+        char tenant_status "机构内状态(0正常1冻结)"
+        timestamp binding_time "入驻时间"
+    }
+
+    qxb_parent_child {
+        int8 relation_id PK "关系自增主键"
+        int8 parent_user_id FK "家长用户UID"
+        int8 child_user_id FK "孩子用户UID"
+        char relation_type "监护关系(1父亲2母亲3其他)"
+        char auth_status "审核状态(0待确认1已确认2已拒绝)"
+        timestamp bind_time "绑定生效时间"
+        timestamp create_time "申请时间"
+    }
+
+    sys_role {
+        int8 role_id PK "角色ID"
+        varchar role_name "角色名称"
+        varchar role_key UK "角色权限字符串"
+        int4 role_sort "显示顺序"
+        char data_scope "数据范围(1全部2自定义3本部门4本部门及以下)"
+        int2 menu_check_strictly "菜单树选择项是否关联显示"
+        int2 dept_check_strictly "部门树选择项是否关联显示"
+        char status "角色状态(0正常1停用)"
+        char del_flag "逻辑删除(0存在2删除)"
+        varchar create_by "创建者"
+        timestamp create_time "创建时间"
+        varchar update_by "更新者"
+        timestamp update_time "更新时间"
+        varchar remark "备注"
+    }
+
+    sys_user_role {
+        int8 user_id PK "用户ID"
+        int8 role_id PK "角色ID"
+    }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="legend">
+                <h3>图例说明</h3>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-symbol pk">PK</div>
+                        <div class="legend-text">主键 (Primary Key)</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-symbol fk">FK</div>
+                        <div class="legend-text">外键 (Foreign Key)</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-text" style="background:#51cf66;color:white;padding:8px 16px;border-radius:4px;font-weight:bold;">||--o{</div>
+                        <div class="legend-text">一对多关系</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="zoom-controls">
+        <button class="zoom-btn" id="zoomIn" title="放大">+</button>
+        <button class="zoom-btn zoom-reset" id="zoomReset" title="重置">100%</button>
+        <button class="zoom-btn" id="zoomOut" title="缩小">−</button>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#667eea',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#7C0000',
+                lineColor: '#667eea',
+                secondaryColor: '#764ba2',
+                tertiaryColor: '#f8f9fa',
+                fontSize: '16px',
+                fontFamily: 'Microsoft YaHei, Arial, sans-serif'
+            },
+            er: { useMaxWidth: true }
+        });
+
+        let scale = 1;
+        const minScale = 0.3;
+        const maxScale = 3;
+        const scaleStep = 0.2;
+        let naturalW = 0;
+        let naturalH = 0;
+
+        const diagramContent = document.getElementById('diagramContent');
+        const diagramContainer = document.getElementById('diagramContainer');
+        const zoomInBtn = document.getElementById('zoomIn');
+        const zoomOutBtn = document.getElementById('zoomOut');
+        const zoomResetBtn = document.getElementById('zoomReset');
+
+        function captureNaturalSize() {
+            if (naturalW && naturalH) return;
+            const svg = diagramContent.querySelector('svg');
+            if (!svg) { setTimeout(captureNaturalSize, 200); return; }
+            const vb = svg.viewBox.baseVal;
+            if (vb && vb.width && vb.height) {
+                naturalW = vb.width;
+                naturalH = vb.height;
+            } else {
+                const rect = svg.getBoundingClientRect();
+                naturalW = rect.width;
+                naturalH = rect.height;
+            }
+            diagramContent.style.width = naturalW + 'px';
+            diagramContent.style.height = naturalH + 'px';
+        }
+
+        function updateZoom() {
+            const s = scale;
+            diagramContent.style.transform = 'scale(' + s + ')';
+            if (naturalW && naturalH) {
+                diagramContent.style.width = (naturalW * s) + 'px';
+                diagramContent.style.height = (naturalH * s) + 'px';
+            }
+            zoomResetBtn.textContent = Math.round(s * 100) + '%';
+        }
+
+        function zoomAtCenter(newScale) {
+            const oldScale = scale;
+            if (newScale === oldScale) return;
+            const cx = diagramContainer.clientWidth / 2;
+            const cy = diagramContainer.clientHeight / 2;
+            const sx = (diagramContainer.scrollLeft + cx) / oldScale;
+            const sy = (diagramContainer.scrollTop + cy) / oldScale;
+            scale = newScale;
+            updateZoom();
+            diagramContainer.scrollLeft = sx * scale - cx;
+            diagramContainer.scrollTop = sy * scale - cy;
+        }
+
+        zoomInBtn.addEventListener('click', function () {
+            if (scale < maxScale) zoomAtCenter(Math.min(scale + scaleStep, maxScale));
+        });
+        zoomOutBtn.addEventListener('click', function () {
+            if (scale > minScale) zoomAtCenter(Math.max(scale - scaleStep, minScale));
+        });
+        zoomResetBtn.addEventListener('click', function () {
+            scale = 1;
+            updateZoom();
+            diagramContainer.scrollLeft = 0;
+            diagramContainer.scrollTop = 0;
+        });
+
+        diagramContainer.addEventListener('wheel', function (e) {
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? -scaleStep : scaleStep;
+                const newScale = Math.max(minScale, Math.min(maxScale, scale + delta));
+                if (newScale !== scale) {
+                    const oldScale = scale;
+                    const mx = e.offsetX;
+                    const my = e.offsetY;
+                    const sx = (diagramContainer.scrollLeft + mx) / oldScale;
+                    const sy = (diagramContainer.scrollTop + my) / oldScale;
+                    scale = newScale;
+                    updateZoom();
+                    diagramContainer.scrollLeft = sx * scale - mx;
+                    diagramContainer.scrollTop = sy * scale - my;
+                }
+            }
+        }, { passive: false });
+
+        let isDragging = false;
+        let startX, startY, scrollLeft, scrollTop;
+
+        diagramContainer.addEventListener('mousedown', function (e) {
+            isDragging = true;
+            startX = e.pageX - diagramContainer.offsetLeft;
+            startY = e.pageY - diagramContainer.offsetTop;
+            scrollLeft = diagramContainer.scrollLeft;
+            scrollTop = diagramContainer.scrollTop;
+        });
+        diagramContainer.addEventListener('mouseleave', function () { isDragging = false; });
+        diagramContainer.addEventListener('mouseup', function () { isDragging = false; });
+        diagramContainer.addEventListener('mousemove', function (e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const x = e.pageX - diagramContainer.offsetLeft;
+            const y = e.pageY - diagramContainer.offsetTop;
+            diagramContainer.scrollLeft = scrollLeft - (x - startX) * 1.5;
+            diagramContainer.scrollTop = scrollTop - (y - startY) * 1.5;
+        });
+
+        window.addEventListener('load', function () { setTimeout(captureNaturalSize, 500); });
+    </script>
+</body>
+</html>
