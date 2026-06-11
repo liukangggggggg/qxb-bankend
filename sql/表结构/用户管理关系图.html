@@ -157,13 +157,18 @@
                     <p><strong>实现：</strong>parent_user_id + child_user_id 唯一索引防重复，relation_type 区分监护关系，auth_status 控制绑定流程。</p>
                 </div>
                 <div class="card">
-                    <h3>6. 角色信息表 (sys_role)</h3>
+                    <h3>6. 学生信息表 (qxb_student_info)</h3>
+                    <p><strong>场景：</strong>支持学校批量导入孩子账号，生成绑定码供家长认领，解决孩子先注册、家长后绑定的问题。</p>
+                    <p><strong>实现：</strong>学生凭学号+初始密码登录，家长注册后输入学号+6位绑定码认领，bind_status 控制绑定状态防止重复认领。</p>
+                </div>
+                <div class="card">
+                    <h3>7. 角色信息表 (sys_role)</h3>
                     <p><strong>场景：</strong>定义系统角色（超级管理员、普通角色等），统一管理菜单权限和数据权限。</p>
                     <p><strong>实现：</strong>role_key 作为权限字符串用于代码判断，data_scope 定义数据范围，支持菜单/部门树关联显示控制。</p>
                 </div>
                 <div class="card">
-                    <h3>7. 用户角色关联表 (sys_user_role)</h3>
-                    <p><strong>场景：</strong>建立 sys_user 与 sys_role 的多对多关系，实现灵活的角色权限分配。</p>
+                    <h3>8. 用户角色关联表 (sys_user_role)</h3>
+                    <p><strong>场景：</strong>建立 qxb_user 与 sys_role 的多对多关系，实现灵活的角色权限分配。</p>
                     <p><strong>实现：</strong>(user_id, role_id) 联合主键防重复分配，支持批量授权和权限回收，构建完整 RBAC 权限模型。</p>
                 </div>
             </div>
@@ -178,6 +183,7 @@ erDiagram
     qxb_user ||--o{ qxb_tenant_user : "一个用户可属于多个机构"
     qxb_user ||--o{ qxb_parent_child : "作为家长绑定多个孩子"
     qxb_user ||--o{ qxb_parent_child : "作为孩子被多个家长绑定"
+    qxb_user ||--o{ qxb_student_info : "一个学生可有一条学籍信息"
     qxb_user ||--o{ sys_user_role : "一个用户可拥有多个角色"
     sys_role ||--o{ sys_user_role : "一个角色可分配给多个用户"
 
@@ -247,6 +253,18 @@ erDiagram
         char auth_status "审核状态(0待确认1已确认2已拒绝)"
         timestamp bind_time "绑定生效时间"
         timestamp create_time "申请时间"
+    }
+
+    qxb_student_info {
+        int8 id PK "自增主键"
+        int8 user_id FK "关联qxb_user"
+        varchar student_no UK "学号"
+        varchar class_name "班级"
+        varchar grade "年级"
+        varchar school_name "学校名称"
+        varchar binding_code "6位绑定码"
+        char bind_status "绑定状态(0未绑定1已绑定)"
+        timestamp create_time "创建时间"
     }
 
     sys_role {
