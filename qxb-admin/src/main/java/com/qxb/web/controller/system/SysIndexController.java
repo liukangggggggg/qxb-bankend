@@ -21,6 +21,7 @@ import com.qxb.system.service.ISysUserService;
 @RestController
 public class SysIndexController
 {
+
     /** 系统基础配置 */
     @Autowired
     private QxbConfig ruoyiConfig;
