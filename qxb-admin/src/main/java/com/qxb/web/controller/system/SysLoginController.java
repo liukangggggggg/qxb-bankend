@@ -3,6 +3,8 @@ package com.qxb.web.controller.system;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
+import com.qxb.common.core.text.Convert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +17,6 @@ import com.qxb.common.core.domain.entity.SysUser;
 import com.qxb.common.core.domain.model.LoginBody;
 import com.qxb.common.core.domain.model.LoginUser;
 import com.qxb.common.core.domain.model.PhoneLoginBody;
-import com.qxb.common.core.text.Convert;
 import com.qxb.common.utils.DateUtils;
 import com.qxb.common.utils.SecurityUtils;
 import com.qxb.common.utils.StringUtils;
@@ -101,8 +102,8 @@ public class SysLoginController
         ajax.put("roles", roles);
         ajax.put("permissions", permissions);
         ajax.put("pwdChrtype", getSysAccountChrtype());
-        ajax.put("isDefaultModifyPwd", initPasswordIsModify(user.getPwdUpdateDate()));
-        ajax.put("isPasswordExpired", passwordIsExpiration(user.getPwdUpdateDate()));
+        ajax.put("isDefaultModifyPwd", false);
+        ajax.put("isPasswordExpired", false);
         return ajax;
     }
 

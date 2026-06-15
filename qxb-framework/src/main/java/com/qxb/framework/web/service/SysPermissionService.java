@@ -10,6 +10,7 @@ import com.qxb.common.constant.Constants;
 import com.qxb.common.constant.UserConstants;
 import com.qxb.common.core.domain.entity.SysRole;
 import com.qxb.common.core.domain.entity.SysUser;
+import com.qxb.common.utils.SecurityUtils;
 import com.qxb.common.utils.StringUtils;
 import com.qxb.system.service.ISysMenuService;
 import com.qxb.system.service.ISysRoleService;
@@ -38,7 +39,7 @@ public class SysPermissionService
     {
         Set<String> roles = new HashSet<String>();
         // 管理员拥有所有权限
-        if (user.isAdmin())
+        if (SecurityUtils.isAdmin(user.getUserId()))
         {
             roles.add(Constants.SUPER_ADMIN);
         }
@@ -59,7 +60,7 @@ public class SysPermissionService
     {
         Set<String> perms = new HashSet<String>();
         // 管理员拥有所有权限
-        if (user.isAdmin())
+        if (SecurityUtils.isAdmin(user.getUserId()))
         {
             perms.add(Constants.ALL_PERMISSION);
         }

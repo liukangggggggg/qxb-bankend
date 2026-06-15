@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qxb.system.mapper.SysUserAuthMapper">
+
+    <resultMap type="SysUserAuth" id="SysUserAuthResult">
+        <id     property="authId"       column="auth_id"        />
+        <result property="userId"       column="user_id"        />
+        <result property="identityType" column="identity_type"  />
+        <result property="identifier"   column="identifier"     />
+        <result property="unionId"      column="union_id"       />
+        <result property="credential"   column="credential"     />
+        <result property="loginIp"      column="login_ip"       />
+        <result property="loginDate"    column="login_date"     />
+        <result property="createTime"   column="create_time"    />
+    </resultMap>
+
+    <select id="selectAuthByIdentifier" resultMap="SysUserAuthResult">
+        select auth_id, user_id, identity_type, identifier, union_id, credential, login_ip, login_date, create_time
+        from sys_user_auth
+        where identity_type = #{identityType} and identifier = #{identifier}
+        limit 1
+    </select>
+
+    <select id="selectAuthByUserId" resultMap="SysUserAuthResult">
+        select auth_id, user_id, identity_type, identifier, union_id, credential, login_ip, login_date, create_time
+        from sys_user_auth
+        where user_id = #{userId}
+        limit 1
+    </select>
+
+    <insert id="insertUserAuth" parameterType="SysUserAuth" useGeneratedKeys="true" keyProperty="authId">
+        insert into sys_user_auth(
+            <if test="userId != null">user_id,</if>
+            <if test="identityType != null and identityType != ''">identity_type,</if>
+            <if test="identifier != null and identifier != ''">identifier,</if>
+            <if test="unionId != null">union_id,</if>
+            <if test="credential != null and credential != ''">credential,</if>
+            create_time
+        )values(
+            <if test="userId != null">#{userId},</if>
+            <if test="identityType != null and identityType != ''">#{identityType},</if>
+            <if test="identifier != null and identifier != ''">#{identifier},</if>
+            <if test="unionId != null">#{unionId},</if>
+            <if test="credential != null and credential != ''">#{credential},</if>
+            current_timestamp
+        )
+    </insert>
+
+    <update id="updateLoginInfo">
+        update sys_user_auth
+        set login_ip = #{loginIp}, login_date = #{loginDate}
+        where auth_id = #{authId}
+    </update>
+
+    <update id="updateCredential">
+        update sys_user_auth
+        set credential = #{credential}
+        where auth_id = #{authId}
+    </update>
+
+    <delete id="deleteAuthByUserId" parameterType="Long">
+        delete from sys_user_auth where user_id = #{userId}
+    </delete>
+
+</mapper>

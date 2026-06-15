@@ -8,18 +8,15 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import com.qxb.common.core.domain.entity.SysUser;
+import com.qxb.common.core.domain.entity.SysUserAuth;
 import com.qxb.common.core.domain.model.LoginUser;
 import com.qxb.common.enums.UserStatus;
 import com.qxb.common.exception.ServiceException;
 import com.qxb.common.utils.MessageUtils;
 import com.qxb.common.utils.StringUtils;
+import com.qxb.system.mapper.SysUserAuthMapper;
 import com.qxb.system.service.ISysUserService;
 
-/**
- * 用户验证处理
- *
- * @author ruoyi
- */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService
 {
@@ -27,7 +24,10 @@ public class UserDetailsServiceImpl implements UserDetailsService
 
     @Autowired
     private ISysUserService userService;
-    
+
+    @Autowired
+    private SysUserAuthMapper authMapper;
+
     @Autowired
     private SysPasswordService passwordService;
 
@@ -37,10 +37,17 @@ public class UserDetailsServiceImpl implements UserDetailsService
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
     {
-        SysUser user = userService.selectUserByUserName(username);
+        SysUserAuth auth = authMapper.selectAuthByIdentifier("password", username);
+        if (StringUtils.isNull(auth))
+        {
+            log.info("登录用户：{} 登录凭证不存在.", username);
+            throw new ServiceException(MessageUtils.message("user.not.exists"));
+        }
+
+        SysUser user = userService.selectUserById(auth.getUserId());
         if (StringUtils.isNull(user))
         {
-            log.info("登录用户：{} 不存在.", username);
+            log.info("登录用户：{} 关联用户不存在.", username);
             throw new ServiceException(MessageUtils.message("user.not.exists"));
         }
         else if (UserStatus.DELETED.getCode().equals(user.getDelFlag()))
@@ -54,13 +61,13 @@ public class UserDetailsServiceImpl implements UserDetailsService
             throw new ServiceException(MessageUtils.message("user.blocked"));
         }
 
-        passwordService.validate(user);
+        passwordService.validate(auth);
 
-        return createLoginUser(user);
+        return createLoginUser(user, auth);
     }
 
-    public UserDetails createLoginUser(SysUser user)
+    public UserDetails createLoginUser(SysUser user, SysUserAuth auth)
     {
-        return new LoginUser(user.getUserId(), user.getDeptId(), user, permissionService.getMenuPermission(user));
+        return new LoginUser(user.getUserId(), user.getDeptId(), user, auth, permissionService.getMenuPermission(user));
     }
 }

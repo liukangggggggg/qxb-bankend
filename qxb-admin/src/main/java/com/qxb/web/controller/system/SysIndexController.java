@@ -8,10 +8,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.qxb.common.config.QxbConfig;
 import com.qxb.common.core.domain.AjaxResult;
-import com.qxb.common.core.domain.entity.SysUser;
+import com.qxb.common.core.domain.entity.SysUserAuth;
 import com.qxb.common.utils.SecurityUtils;
 import com.qxb.common.utils.StringUtils;
-import com.qxb.system.service.ISysUserService;
+import com.qxb.system.mapper.SysUserAuthMapper;
+import com.qxb.framework.web.service.UserDetailsServiceImpl;
 
 /**
  * 首页
@@ -27,11 +28,11 @@ public class SysIndexController
     private QxbConfig ruoyiConfig;
 
     @Autowired
-    private ISysUserService userService;
+    private SysUserAuthMapper authMapper;
 
-    /**
-     * 访问首页，提示语
-     */
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService;
+
     @RequestMapping("/")
     public String index()
     {
@@ -50,12 +51,12 @@ public class SysIndexController
             return AjaxResult.error("密码不能为空");
         }
         String username = SecurityUtils.getUsername();
-        SysUser user = userService.selectUserByUserName(username);
-        if (user == null)
+        SysUserAuth auth = authMapper.selectAuthByIdentifier("password", username);
+        if (auth == null)
         {
             return AjaxResult.error("服务器超时，请重新登录");
         }
-        if (!SecurityUtils.matchesPassword(password, user.getPassword()))
+        if (!SecurityUtils.matchesPassword(password, auth.getCredential()))
         {
             return AjaxResult.error("密码错误，请重新输入");
         }

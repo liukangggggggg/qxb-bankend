@@ -67,7 +67,7 @@ public class SensitiveJsonSerializer extends StdSerializer<String>
         {
             LoginUser securityUser = SecurityUtils.getLoginUser();
             // 管理员不脱敏
-            return !securityUser.getUser().isAdmin();
+            return !SecurityUtils.isAdmin(securityUser.getUser().getUserId());
         }
         catch (Exception e)
         {

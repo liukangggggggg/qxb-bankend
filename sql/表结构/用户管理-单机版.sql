@@ -14,6 +14,7 @@ CREATE TABLE "public"."sys_user" (
                                      "nick_name" varchar(30) NOT NULL,
                                      "real_name" varchar(30) DEFAULT ''::character varying,
                                      "avatar" varchar(255) DEFAULT ''::character varying,
+                                     "phone_number" varchar(11) DEFAULT ''::character varying,
                                      "email" varchar(50) DEFAULT ''::character varying,
                                      "city" varchar(20) DEFAULT ''::character varying,
                                      "sex" char(1) DEFAULT '0'::bpchar,
@@ -37,6 +38,7 @@ COMMENT ON COLUMN "public"."sys_user"."nick_name" IS '用户昵称';
 COMMENT ON COLUMN "public"."sys_user"."real_name" IS '真实姓名 (高频查询字段，实名认证后写入)';
 COMMENT ON COLUMN "public"."sys_user"."avatar" IS '用户头像URL地址 (预留255位以兼容多端长URL)';
 COMMENT ON COLUMN "public"."sys_user"."email" IS '电子邮箱 (用于找回密码、通知推送)';
+COMMENT ON COLUMN "public"."sys_user"."phone_number" IS '手机号码 (用于手机快捷登录、找回密码、短信通知推送)';
 COMMENT ON COLUMN "public"."sys_user"."city" IS '所在城市 (咨询师检索、本地服务推荐的核心筛选条件)';
 COMMENT ON COLUMN "public"."sys_user"."sex" IS '用户性别 (0男 1女 2未知)';
 COMMENT ON COLUMN "public"."sys_user"."birthday" IS '出生日期 (用于在心理咨询和量表测评中动态计算精确年龄段)';

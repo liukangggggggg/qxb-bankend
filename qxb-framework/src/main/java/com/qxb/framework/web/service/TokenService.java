@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import com.qxb.common.utils.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -249,7 +251,7 @@ public class TokenService
         for (String key : keys)
         {
             LoginUser loginUser = redisCache.getCacheObject(key);
-            if (loginUser == null || loginUser.getUser() == null || loginUser.getUser().isAdmin())
+            if (loginUser == null || loginUser.getUser() == null || SecurityUtils.isAdmin(loginUser.getUser().getUserId()))
             {
                 // 管理员拥有所有权限，跳过
                 continue;

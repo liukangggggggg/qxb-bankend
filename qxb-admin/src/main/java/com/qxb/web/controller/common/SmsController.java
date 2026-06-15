@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.qxb.common.core.controller.BaseController;
 import com.qxb.common.core.domain.AjaxResult;
-import com.qxb.common.core.domain.entity.SysUser;
+import com.qxb.common.core.domain.entity.SysUserAuth;
 import com.qxb.common.core.domain.model.LoginUser;
 import com.qxb.common.core.domain.model.SmsSendBody;
 import com.qxb.common.enums.SmsCodeType;
@@ -14,13 +14,8 @@ import com.qxb.common.utils.MessageUtils;
 import com.qxb.common.utils.SecurityUtils;
 import com.qxb.common.utils.StringUtils;
 import com.qxb.framework.web.service.SmsCodeService;
-import com.qxb.system.service.ISysUserService;
+import com.qxb.system.mapper.SysUserAuthMapper;
 
-/**
- * 短信验证码
- *
- * @author qxb
- */
 @RestController
 public class SmsController extends BaseController
 {
@@ -28,11 +23,8 @@ public class SmsController extends BaseController
     private SmsCodeService smsCodeService;
 
     @Autowired
-    private ISysUserService userService;
+    private SysUserAuthMapper authMapper;
 
-    /**
-     * 发送短信验证码
-     */
     @PostMapping("/sms/send")
     public AjaxResult send(@RequestBody SmsSendBody body)
     {
@@ -52,19 +44,16 @@ public class SmsController extends BaseController
         smsCodeService.validatePhone(body.getPhone());
         if (type == SmsCodeType.LOGIN)
         {
-            SysUser user = userService.selectUserByPhonenumber(body.getPhone());
-            if (StringUtils.isNull(user))
+            SysUserAuth auth = authMapper.selectAuthByIdentifier("phone", body.getPhone());
+            if (StringUtils.isNull(auth))
             {
                 return error(MessageUtils.message("user.phone.not.bound"));
             }
         }
         else if (type == SmsCodeType.BIND)
         {
-            LoginUser loginUser = SecurityUtils.getLoginUser();
-            SysUser checkUser = new SysUser();
-            checkUser.setUserId(loginUser.getUserId());
-            checkUser.setPhonenumber(body.getPhone());
-            if (!userService.checkPhoneUnique(checkUser))
+            SysUserAuth auth = authMapper.selectAuthByIdentifier("phone", body.getPhone());
+            if (auth != null)
             {
                 return error("该手机号已被其他账号绑定");
             }

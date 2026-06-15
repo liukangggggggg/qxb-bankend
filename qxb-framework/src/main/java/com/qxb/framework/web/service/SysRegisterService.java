@@ -2,28 +2,25 @@ package com.qxb.framework.web.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import com.qxb.common.constant.CacheConstants;
 import com.qxb.common.constant.Constants;
 import com.qxb.common.constant.UserConstants;
 import com.qxb.common.core.domain.entity.SysUser;
+import com.qxb.common.core.domain.entity.SysUserAuth;
 import com.qxb.common.core.domain.model.RegisterBody;
 import com.qxb.common.core.redis.RedisCache;
 import com.qxb.common.exception.user.CaptchaException;
 import com.qxb.common.exception.user.CaptchaExpireException;
-import com.qxb.common.utils.DateUtils;
 import com.qxb.common.utils.MessageUtils;
 import com.qxb.common.utils.SecurityUtils;
 import com.qxb.common.utils.StringUtils;
 import com.qxb.framework.manager.AsyncManager;
 import com.qxb.framework.manager.factory.AsyncFactory;
+import com.qxb.system.mapper.SysUserAuthMapper;
 import com.qxb.system.service.ISysConfigService;
 import com.qxb.system.service.ISysUserService;
 
-/**
- * 注册校验方法
- * 
- * @author ruoyi
- */
 @Component
 public class SysRegisterService
 {
@@ -36,16 +33,14 @@ public class SysRegisterService
     @Autowired
     private RedisCache redisCache;
 
-    /**
-     * 注册
-     */
+    @Autowired
+    private SysUserAuthMapper authMapper;
+
+    @Transactional
     public String register(RegisterBody registerBody)
     {
         String msg = "", username = registerBody.getUsername(), password = registerBody.getPassword();
-        SysUser sysUser = new SysUser();
-        sysUser.setUserName(username);
 
-        // 验证码开关
         boolean captchaEnabled = configService.selectCaptchaEnabled();
         if (captchaEnabled)
         {
@@ -70,36 +65,28 @@ public class SysRegisterService
         {
             msg = "密码长度必须在5到20个字符之间";
         }
-        else if (!userService.checkUserNameUnique(sysUser))
+        else if (authMapper.selectAuthByIdentifier("password", username) != null)
         {
             msg = "保存用户'" + username + "'失败，注册账号已存在";
         }
         else
         {
-            sysUser.setNickName(username);
-            sysUser.setPwdUpdateDate(DateUtils.getNowDate());
-            sysUser.setPassword(SecurityUtils.encryptPassword(password));
-            boolean regFlag = userService.registerUser(sysUser);
-            if (!regFlag)
-            {
-                msg = "注册失败,请联系系统管理人员";
-            }
-            else
-            {
-                AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.REGISTER, MessageUtils.message("user.register.success")));
-            }
+            SysUser user = new SysUser();
+            user.setNickName(username);
+            userService.registerUser(user);
+
+            SysUserAuth auth = new SysUserAuth();
+            auth.setUserId(user.getUserId());
+            auth.setIdentityType("password");
+            auth.setIdentifier(username);
+            auth.setCredential(SecurityUtils.encryptPassword(password));
+            authMapper.insertUserAuth(auth);
+
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.REGISTER, MessageUtils.message("user.register.success")));
         }
         return msg;
     }
 
-    /**
-     * 校验验证码
-     * 
-     * @param username 用户名
-     * @param code 验证码
-     * @param uuid 唯一标识
-     * @return 结果
-     */
     public void validateCaptcha(String username, String code, String uuid)
     {
         String verifyKey = CacheConstants.CAPTCHA_CODE_KEY + StringUtils.nvl(uuid, "");

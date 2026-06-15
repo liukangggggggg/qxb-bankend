@@ -11,6 +11,7 @@ import com.qxb.common.constant.CacheConstants;
 import com.qxb.common.constant.Constants;
 import com.qxb.common.constant.UserConstants;
 import com.qxb.common.core.domain.entity.SysUser;
+import com.qxb.common.core.domain.entity.SysUserAuth;
 import com.qxb.common.core.domain.model.LoginUser;
 import com.qxb.common.core.redis.RedisCache;
 import com.qxb.common.enums.SmsCodeType;
@@ -28,8 +29,11 @@ import com.qxb.common.utils.ip.IpUtils;
 import com.qxb.framework.manager.AsyncManager;
 import com.qxb.framework.manager.factory.AsyncFactory;
 import com.qxb.framework.security.context.AuthenticationContextHolder;
+import com.qxb.system.mapper.SysUserAuthMapper;
 import com.qxb.system.service.ISysConfigService;
 import com.qxb.system.service.ISysUserService;
+
+import static com.qxb.framework.datasource.DynamicDataSourceContextHolder.log;
 
 /**
  * 登录校验方法
@@ -47,7 +51,7 @@ public class SysLoginService
 
     @Autowired
     private RedisCache redisCache;
-    
+
     @Autowired
     private ISysUserService userService;
 
@@ -60,6 +64,8 @@ public class SysLoginService
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
+    @Autowired
+    private SysUserAuthMapper authMapper;
     /**
      * 登录验证
      * 
@@ -81,7 +87,7 @@ public class SysLoginService
         {
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
             AuthenticationContextHolder.setContext(authenticationToken);
-            // 该方法会去调用UserDetailsServiceImpl.loadUserByUsername
+            // 通过Spring Security的认证管理器执行身份验证
             authentication = authenticationManager.authenticate(authenticationToken);
         }
         catch (Exception e)
@@ -103,9 +109,11 @@ public class SysLoginService
         }
         AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success")));
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
-        recordLoginInfo(loginUser.getUserId());
-        // 生成token
-        return tokenService.createToken(loginUser);
+        recordLoginInfo(username);
+        if (loginUser != null) {
+            return tokenService.createToken(loginUser);
+        }
+        return username;
     }
 
     /**
@@ -119,11 +127,19 @@ public class SysLoginService
     {
         smsCodeService.validatePhone(phone);
         smsCodeService.verifyCode(phone, SmsCodeType.LOGIN, smsCode);
-        SysUser user = userService.selectUserByPhonenumber(phone);
-        if (StringUtils.isNull(user))
+
+        SysUserAuth auth = authMapper.selectAuthByIdentifier("phone", phone);
+        if (StringUtils.isNull(auth))
         {
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(phone, Constants.LOGIN_FAIL, MessageUtils.message("user.phone.not.bound")));
             throw new ServiceException(MessageUtils.message("user.phone.not.bound"));
+        }
+
+        SysUser user = userService.selectUserById(auth.getUserId());
+        if (StringUtils.isNull(user))
+        {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(phone, Constants.LOGIN_FAIL, MessageUtils.message("user.not.exists")));
+            throw new ServiceException(MessageUtils.message("user.not.exists"));
         }
         if (UserStatus.DELETED.getCode().equals(user.getDelFlag()))
         {
@@ -141,9 +157,9 @@ public class SysLoginService
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(phone, Constants.LOGIN_FAIL, MessageUtils.message("login.blocked")));
             throw new BlackListException();
         }
-        AsyncManager.me().execute(AsyncFactory.recordLogininfor(user.getUserName(), Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success")));
-        LoginUser loginUser = (LoginUser) userDetailsService.createLoginUser(user);
-        recordLoginInfo(loginUser.getUserId());
+        AsyncManager.me().execute(AsyncFactory.recordLogininfor(phone, Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success")));
+        LoginUser loginUser = (LoginUser) userDetailsService.createLoginUser(user, auth);
+        recordLoginInfo(phone);
         return tokenService.createToken(loginUser);
     }
 
@@ -215,10 +231,18 @@ public class SysLoginService
     /**
      * 记录登录信息
      *
-     * @param userId 用户ID
+     * @param identifier 用户唯一标识
      */
-    public void recordLoginInfo(Long userId)
+    public void recordLoginInfo(String identifier)
     {
-        userService.updateLoginInfo(userId, IpUtils.getIpAddr(), DateUtils.getNowDate());
+        SysUserAuth auth = authMapper.selectAuthByIdentifier("password", identifier);
+        if (auth != null)
+        {
+            // 更新登录信息
+            authMapper.updateLoginInfo(auth.getAuthId(), IpUtils.getIpAddr(), DateUtils.getNowDate());
+        } else {
+            // 记录日志，因为正常情况下不应出现找不到认证信息的情况
+            log.warn("无法找到用户 {} 的认证信息，无法更新登录信息", identifier);
+        }
     }
 }
