@@ -128,6 +128,12 @@
             <groupId>io.minio</groupId>
             <artifactId>minio</artifactId>
         </dependency>
+        <!-- Spring Boot 配置处理器（用于 @ConfigurationProperties 元数据生成） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
 
 
     </dependencies>
