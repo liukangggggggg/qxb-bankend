@@ -3,6 +3,8 @@ package com.qxb.web.controller.common;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+
+import com.qxb.common.annotation.Anonymous;
 import jakarta.annotation.Resource;
 import javax.imageio.ImageIO;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,6 +44,7 @@ public class CaptchaController
     /**
      * 生成验证码
      */
+    @Anonymous
     @GetMapping("/captchaImage")
     public AjaxResult getCode(HttpServletResponse response) throws IOException
     {

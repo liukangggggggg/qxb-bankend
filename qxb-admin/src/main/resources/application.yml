@@ -159,6 +159,11 @@ sms:
   # 发送间隔（秒）
   send-interval: 60
 
+# 微信小程序配置
+wechat:
+  app-id:
+  app-secret:
+
 minio:
   endpoint: http://localhost:9000
   bucketName: qxb

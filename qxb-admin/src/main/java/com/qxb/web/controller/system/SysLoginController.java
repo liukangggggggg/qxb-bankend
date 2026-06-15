@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import com.qxb.common.annotation.Anonymous;
 import com.qxb.common.core.text.Convert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,6 +56,7 @@ public class SysLoginController
      * @param loginBody 登录信息
      * @return 结果
      */
+    @Anonymous
     @PostMapping("/login")
     public AjaxResult login(@RequestBody LoginBody loginBody)
     {

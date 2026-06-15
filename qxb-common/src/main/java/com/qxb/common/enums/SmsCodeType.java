@@ -11,7 +11,10 @@ public enum SmsCodeType
     LOGIN("login"),
 
     /** 绑定手机号 */
-    BIND("bind");
+    BIND("bind"),
+
+    /** 注册 */
+    REGISTER("register");
 
     private final String code;
 

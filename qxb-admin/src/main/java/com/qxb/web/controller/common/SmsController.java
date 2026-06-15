@@ -1,5 +1,6 @@
 package com.qxb.web.controller.common;
 
+import com.qxb.common.annotation.Anonymous;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +26,7 @@ public class SmsController extends BaseController
     @Autowired
     private SysUserAuthMapper authMapper;
 
+    @Anonymous
     @PostMapping("/sms/send")
     public AjaxResult send(@RequestBody SmsSendBody body)
     {
@@ -50,7 +52,7 @@ public class SmsController extends BaseController
                 return error(MessageUtils.message("user.phone.not.bound"));
             }
         }
-        else if (type == SmsCodeType.BIND)
+        else if (type == SmsCodeType.BIND || type == SmsCodeType.REGISTER)
         {
             SysUserAuth auth = authMapper.selectAuthByIdentifier("phone", body.getPhone());
             if (auth != null)

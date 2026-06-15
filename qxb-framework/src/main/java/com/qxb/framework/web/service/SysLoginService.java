@@ -32,6 +32,7 @@ import com.qxb.framework.security.context.AuthenticationContextHolder;
 import com.qxb.system.mapper.SysUserAuthMapper;
 import com.qxb.system.service.ISysConfigService;
 import com.qxb.system.service.ISysUserService;
+import com.qxb.framework.web.service.WechatService.WechatSession;
 
 import static com.qxb.framework.datasource.DynamicDataSourceContextHolder.log;
 
@@ -66,6 +67,9 @@ public class SysLoginService
 
     @Autowired
     private SysUserAuthMapper authMapper;
+
+    @Autowired
+    private WechatService wechatService;
     /**
      * 登录验证
      * 
@@ -160,6 +164,120 @@ public class SysLoginService
         AsyncManager.me().execute(AsyncFactory.recordLogininfor(phone, Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success")));
         LoginUser loginUser = (LoginUser) userDetailsService.createLoginUser(user, auth);
         recordLoginInfo(phone);
+        return tokenService.createToken(loginUser);
+    }
+
+    /**
+     * 手机验证码一键登录注册（手机号不存在则自动注册）
+     *
+     * @param phone 手机号码
+     * @param smsCode 短信验证码
+     * @return token
+     */
+    public String phoneLoginOrRegister(String phone, String smsCode)
+    {
+        smsCodeService.validatePhone(phone);
+        smsCodeService.verifyCode(phone, SmsCodeType.LOGIN, smsCode);
+
+        SysUserAuth auth = authMapper.selectAuthByIdentifier("phone", phone);
+        if (auth == null)
+        {
+            SysUser user = new SysUser();
+            user.setNickName(phone);
+            userService.registerUser(user);
+
+            auth = new SysUserAuth();
+            auth.setUserId(user.getUserId());
+            auth.setIdentityType("phone");
+            auth.setIdentifier(phone);
+            authMapper.insertUserAuth(auth);
+        }
+
+        SysUser user = userService.selectUserById(auth.getUserId());
+        if (StringUtils.isNull(user))
+        {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(phone, Constants.LOGIN_FAIL, MessageUtils.message("user.not.exists")));
+            throw new ServiceException(MessageUtils.message("user.not.exists"));
+        }
+        if (UserStatus.DELETED.getCode().equals(user.getDelFlag()))
+        {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(phone, Constants.LOGIN_FAIL, MessageUtils.message("user.password.delete")));
+            throw new ServiceException(MessageUtils.message("user.password.delete"));
+        }
+        if (UserStatus.DISABLE.getCode().equals(user.getStatus()))
+        {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(phone, Constants.LOGIN_FAIL, MessageUtils.message("user.blocked")));
+            throw new ServiceException(MessageUtils.message("user.blocked"));
+        }
+        String blackStr = configService.selectConfigByKey("sys.login.blackIPList");
+        if (IpUtils.isMatchedIp(blackStr, IpUtils.getIpAddr()))
+        {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(phone, Constants.LOGIN_FAIL, MessageUtils.message("login.blocked")));
+            throw new BlackListException();
+        }
+        AsyncManager.me().execute(AsyncFactory.recordLogininfor(phone, Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success")));
+        LoginUser loginUser = (LoginUser) userDetailsService.createLoginUser(user, auth);
+        recordLoginInfo(phone);
+        return tokenService.createToken(loginUser);
+    }
+
+    /**
+     * 微信小程序一键登录注册
+     *
+     * @param code 微信登录code（wx.login获取）
+     * @return token
+     */
+    public String wechatLogin(String code)
+    {
+        WechatSession session = wechatService.jscode2session(code);
+        String openid = session.getOpenid();
+        String unionid = session.getUnionid();
+
+        SysUserAuth auth = authMapper.selectAuthByIdentifier("wechat", openid);
+        if (auth == null && StringUtils.isNotEmpty(unionid))
+        {
+            auth = authMapper.selectAuthByIdentifier("wechat", unionid);
+        }
+
+        if (auth == null)
+        {
+            SysUser user = new SysUser();
+            user.setNickName("wx_" + openid.substring(0, Math.min(8, openid.length())));
+            userService.registerUser(user);
+
+            auth = new SysUserAuth();
+            auth.setUserId(user.getUserId());
+            auth.setIdentityType("wechat");
+            auth.setIdentifier(openid);
+            auth.setUnionId(unionid);
+            authMapper.insertUserAuth(auth);
+        }
+
+        SysUser user = userService.selectUserById(auth.getUserId());
+        if (StringUtils.isNull(user))
+        {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(openid, Constants.LOGIN_FAIL, MessageUtils.message("user.not.exists")));
+            throw new ServiceException(MessageUtils.message("user.not.exists"));
+        }
+        if (UserStatus.DELETED.getCode().equals(user.getDelFlag()))
+        {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(openid, Constants.LOGIN_FAIL, MessageUtils.message("user.password.delete")));
+            throw new ServiceException(MessageUtils.message("user.password.delete"));
+        }
+        if (UserStatus.DISABLE.getCode().equals(user.getStatus()))
+        {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(openid, Constants.LOGIN_FAIL, MessageUtils.message("user.blocked")));
+            throw new ServiceException(MessageUtils.message("user.blocked"));
+        }
+        String blackStr = configService.selectConfigByKey("sys.login.blackIPList");
+        if (IpUtils.isMatchedIp(blackStr, IpUtils.getIpAddr()))
+        {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(openid, Constants.LOGIN_FAIL, MessageUtils.message("login.blocked")));
+            throw new BlackListException();
+        }
+        AsyncManager.me().execute(AsyncFactory.recordLogininfor(openid, Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success")));
+        LoginUser loginUser = (LoginUser) userDetailsService.createLoginUser(user, auth);
+        recordLoginInfo(openid);
         return tokenService.createToken(loginUser);
     }
 
