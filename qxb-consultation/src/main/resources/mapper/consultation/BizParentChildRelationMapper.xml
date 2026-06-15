@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+        <!DOCTYPE mapper
+                PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+                "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.qxb.consultation.mapper.BizParentChildRelationMapper">
+
+    <resultMap id="BizParentChildRelationResult" type="com.qxb.consultation.domain.BizParentChildRelation">
+        <id     property="relationId"     column="relation_id" />
+        <result property="parentUserId"   column="parent_user_id" />
+        <result property="childUserId"    column="child_user_id" />
+        <result property="relationType"   column="relation_type" />
+        <result property="authStatus"     column="auth_status" />
+        <result property="bindTime"       column="bind_time" />
+        <result property="createTime"     column="create_time" />
+    </resultMap>
+
+    <sql id="baseColumnList">
+        relation_id, parent_user_id, child_user_id, relation_type,
+        auth_status, bind_time, create_time
+    </sql>
+
+    <select id="selectById" parameterType="Long" resultMap="BizParentChildRelationResult">
+        select <include refid="baseColumnList"/>
+        from public.biz_parent_child_relation
+        where relation_id = #{relationId}
+    </select>
+
+    <select id="selectByParentUserId" parameterType="Long" resultMap="BizParentChildRelationResult">
+        select <include refid="baseColumnList"/>
+        from public.biz_parent_child_relation
+        where parent_user_id = #{parentUserId}
+        order by create_time desc
+    </select>
+
+    <select id="selectByChildUserId" parameterType="Long" resultMap="BizParentChildRelationResult">
+        select <include refid="baseColumnList"/>
+        from public.biz_parent_child_relation
+        where child_user_id = #{childUserId}
+        order by create_time desc
+    </select>
+
+    <select id="selectByParentAndChild" resultMap="BizParentChildRelationResult">
+        select <include refid="baseColumnList"/>
+        from public.biz_parent_child_relation
+        where parent_user_id = #{parentUserId}
+        and child_user_id = #{childUserId}
+    </select>
+
+    <select id="selectByAuthStatus" parameterType="String" resultMap="BizParentChildRelationResult">
+        select <include refid="baseColumnList"/>
+        from public.biz_parent_child_relation
+        where auth_status = #{authStatus}
+        order by create_time desc
+    </select>
+
+    <select id="selectList" parameterType="com.qxb.consultation.domain.BizParentChildRelation" resultMap="BizParentChildRelationResult">
+        select <include refid="baseColumnList"/>
+        from public.biz_parent_child_relation
+        <where>
+            <if test="relationId != null">and relation_id = #{relationId}</if>
+            <if test="parentUserId != null">and parent_user_id = #{parentUserId}</if>
+            <if test="childUserId != null">and child_user_id = #{childUserId}</if>
+            <if test="relationType != null and relationType != ''">and relation_type = #{relationType}</if>
+            <if test="authStatus != null and authStatus != ''">and auth_status = #{authStatus}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectCount" parameterType="com.qxb.consultation.domain.BizParentChildRelation" resultType="int">
+        select count(1)
+        from public.biz_parent_child_relation
+        <where>
+            <if test="relationId != null">and relation_id = #{relationId}</if>
+            <if test="parentUserId != null">and parent_user_id = #{parentUserId}</if>
+            <if test="childUserId != null">and child_user_id = #{childUserId}</if>
+            <if test="relationType != null and relationType != ''">and relation_type = #{relationType}</if>
+            <if test="authStatus != null and authStatus != ''">and auth_status = #{authStatus}</if>
+        </where>
+    </select>
+
+    <insert id="insertSelective" parameterType="com.qxb.consultation.domain.BizParentChildRelation" useGeneratedKeys="true" keyProperty="relationId">
+        insert into public.biz_parent_child_relation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="relationId != null">relation_id,</if>
+            <if test="parentUserId != null">parent_user_id,</if>
+            <if test="childUserId != null">child_user_id,</if>
+            <if test="relationType != null">relation_type,</if>
+            <if test="authStatus != null">auth_status,</if>
+            <if test="bindTime != null">bind_time,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="relationId != null">#{relationId},</if>
+            <if test="parentUserId != null">#{parentUserId},</if>
+            <if test="childUserId != null">#{childUserId},</if>
+            <if test="relationType != null">#{relationType},</if>
+            <if test="authStatus != null">#{authStatus},</if>
+            <if test="bindTime != null">#{bindTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateByIdSelective" parameterType="com.qxb.consultation.domain.BizParentChildRelation">
+        update public.biz_parent_child_relation
+        <set>
+            <if test="parentUserId != null">parent_user_id = #{parentUserId},</if>
+            <if test="childUserId != null">child_user_id = #{childUserId},</if>
+            <if test="relationType != null">relation_type = #{relationType},</if>
+            <if test="authStatus != null">auth_status = #{authStatus},</if>
+            <if test="bindTime != null">bind_time = #{bindTime},</if>
+        </set>
+        where relation_id = #{relationId}
+    </update>
+
+    <update id="updateAuthStatus">
+        update public.biz_parent_child_relation
+        set auth_status = #{authStatus},
+        bind_time = #{bindTime},
+        create_time = #{updateTime}
+        where relation_id = #{relationId}
+    </update>
+
+    <delete id="deleteById" parameterType="Long">
+        delete from public.biz_parent_child_relation
+        where relation_id = #{relationId}
+    </delete>
+
+    <delete id="deleteByParentAndChild">
+        delete from public.biz_parent_child_relation
+        where parent_user_id = #{parentUserId}
+        and child_user_id = #{childUserId}
+    </delete>
+
+</mapper>
