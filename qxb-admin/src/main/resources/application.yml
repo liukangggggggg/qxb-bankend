@@ -166,9 +166,13 @@ wechat:
 
 minio:
   endpoint: http://localhost:9000
-  bucketName: qxb
+  bucket-name: qxb
   public-endpoint: http://localhost:9000
   access-key: admin
   secret-key: admin123
+  trust-all-certificates: false
+  connect-timeout: 10s
+  read-timeout: 30s
+  write-timeout: 30s
 
 

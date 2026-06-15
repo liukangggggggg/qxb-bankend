@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.qxb.consultation.mapper.BizCounselorQualificationMapper">
+
+    <resultMap id="BizCounselorQualificationResult" type="com.qxb.consultation.domain.BizCounselorQualification">
+        <id     property="id"                 column="id" />
+        <result property="userId"             column="user_id" />
+        <result property="qualificationName"  column="qualification_name" />
+        <result property="issuingAuthority"   column="issuing_authority" />
+        <result property="certNo"             column="cert_no" />
+        <result property="obtainDate"         column="obtain_date" />
+        <result property="expireDate"         column="expire_date" />
+        <result property="certImage"          column="cert_image" />
+        <result property="verifyStatus"       column="verify_status" />
+        <result property="createTime"         column="create_time" />
+        <result property="updateTime"         column="update_time" />
+        <result property="deleted"            column="deleted" />
+    </resultMap>
+
+    <sql id="baseColumnList">
+        id, user_id, qualification_name, issuing_authority, cert_no,
+        obtain_date, expire_date, cert_image, verify_status,
+        create_time, update_time, deleted
+    </sql>
+
+    <select id="selectById" parameterType="Long" resultMap="BizCounselorQualificationResult">
+        select <include refid="baseColumnList"/>
+        from public.biz_counselor_qualification
+        where id = #{id}
+        and deleted = '0'
+    </select>
+
+    <select id="selectByUserId" parameterType="Long" resultMap="BizCounselorQualificationResult">
+        select <include refid="baseColumnList"/>
+        from public.biz_counselor_qualification
+        where user_id = #{userId}
+        and deleted = '0'
+        order by create_time desc
+    </select>
+
+    <select id="selectByCertNo" parameterType="String" resultMap="BizCounselorQualificationResult">
+        select <include refid="baseColumnList"/>
+        from public.biz_counselor_qualification
+        where cert_no = #{certNo}
+        and deleted = '0'
+    </select>
+
+    <select id="selectByVerifyStatus" parameterType="String" resultMap="BizCounselorQualificationResult">
+        select <include refid="baseColumnList"/>
+        from public.biz_counselor_qualification
+        where verify_status = #{verifyStatus}
+        and deleted = '0'
+        order by create_time desc
+    </select>
+
+    <select id="selectList" parameterType="com.qxb.consultation.domain.BizCounselorQualification" resultMap="BizCounselorQualificationResult">
+        select <include refid="baseColumnList"/>
+        from public.biz_counselor_qualification
+        <where>
+            deleted = '0'
+            <if test="id != null">and id = #{id}</if>
+            <if test="userId != null">and user_id = #{userId}</if>
+            <if test="qualificationName != null and qualificationName != ''">
+                and qualification_name like concat('%', #{qualificationName}, '%')
+            </if>
+            <if test="issuingAuthority != null and issuingAuthority != ''">
+                and issuing_authority like concat('%', #{issuingAuthority}, '%')
+            </if>
+            <if test="certNo != null and certNo != ''">and cert_no = #{certNo}</if>
+            <if test="verifyStatus != null and verifyStatus != ''">and verify_status = #{verifyStatus}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectCount" parameterType="com.qxb.consultation.domain.BizCounselorQualification" resultType="Integer">
+        select count(1)
+        from public.biz_counselor_qualification
+        <where>
+            deleted = '0'
+            <if test="id != null">and id = #{id}</if>
+            <if test="userId != null">and user_id = #{userId}</if>
+            <if test="qualificationName != null and qualificationName != ''">
+                and qualification_name like concat('%', #{qualificationName}, '%')
+            </if>
+            <if test="issuingAuthority != null and issuingAuthority != ''">
+                and issuing_authority like concat('%', #{issuingAuthority}, '%')
+            </if>
+            <if test="certNo != null and certNo != ''">and cert_no = #{certNo}</if>
+            <if test="verifyStatus != null and verifyStatus != ''">and verify_status = #{verifyStatus}</if>
+        </where>
+    </select>
+
+    <insert id="insertSelective" parameterType="com.qxb.consultation.domain.BizCounselorQualification" useGeneratedKeys="true" keyProperty="id">
+        insert into public.biz_counselor_qualification
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="qualificationName != null">qualification_name,</if>
+            <if test="issuingAuthority != null">issuing_authority,</if>
+            <if test="certNo != null">cert_no,</if>
+            <if test="obtainDate != null">obtain_date,</if>
+            <if test="expireDate != null">expire_date,</if>
+            <if test="certImage != null">cert_image,</if>
+            <if test="verifyStatus != null">verify_status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="deleted != null">deleted,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="qualificationName != null">#{qualificationName},</if>
+            <if test="issuingAuthority != null">#{issuingAuthority},</if>
+            <if test="certNo != null">#{certNo},</if>
+            <if test="obtainDate != null">#{obtainDate},</if>
+            <if test="expireDate != null">#{expireDate},</if>
+            <if test="certImage != null">#{certImage},</if>
+            <if test="verifyStatus != null">#{verifyStatus},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="deleted != null">#{deleted},</if>
+        </trim>
+    </insert>
+
+    <update id="updateByIdSelective" parameterType="com.qxb.consultation.domain.BizCounselorQualification">
+        update public.biz_counselor_qualification
+        <set>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="qualificationName != null">qualification_name = #{qualificationName},</if>
+            <if test="issuingAuthority != null">issuing_authority = #{issuingAuthority},</if>
+            <if test="certNo != null">cert_no = #{certNo},</if>
+            <if test="obtainDate != null">obtain_date = #{obtainDate},</if>
+            <if test="expireDate != null">expire_date = #{expireDate},</if>
+            <if test="certImage != null">cert_image = #{certImage},</if>
+            <if test="verifyStatus != null">verify_status = #{verifyStatus},</if>
+            update_time = current_timestamp
+        </set>
+        where id = #{id}
+        and deleted = '0'
+    </update>
+
+    <update id="updateVerifyStatus">
+        update public.biz_counselor_qualification
+        set verify_status = #{verifyStatus},
+            update_time = #{updateTime}
+        where id = #{id}
+          and deleted = '0'
+    </update>
+
+    <update id="deleteById">
+        update public.biz_counselor_qualification
+        set deleted = '1',
+            update_time = #{updateTime}
+        where id = #{id}
+          and deleted = '0'
+    </update>
+
+</mapper>

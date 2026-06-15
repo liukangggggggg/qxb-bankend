@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.qxb.consultation.mapper.BizCounselorProfileMapper">
+
+    <resultMap id="BizCounselorProfileResult" type="com.qxb.consultation.domain.BizCounselorProfile">
+        <id     property="id"                   column="id" />
+        <result property="userId"               column="user_id" />
+        <result property="personalTitle"        column="personal_title" />
+        <result property="introduction"         column="introduction" />
+        <result property="signature"            column="signature" />
+        <result property="education"            column="education" />
+        <result property="level"                column="level" />
+        <result property="isSupervisor"         column="is_supervisor" />
+        <result property="startDate"            column="start_date" />
+        <result property="workTime"             column="work_time" />
+        <result property="methods"              column="methods" />
+        <result property="price"                column="price" />
+        <result property="consulationAddr"      column="consulation_addr" />
+        <result property="timeBase"             column="time_base" />
+        <result property="isAcceptOrder"        column="is_accept_order" />
+        <result property="publicConsultation"   column="public_consultation" />
+        <result property="counselorPepoleCount" column="counselor_pepole_count" />
+        <result property="sortIndex"            column="sort_index" />
+        <result property="isTop"                column="is_top" />
+        <result property="activityPriority"     column="activity_priority" />
+        <result property="couponIds"            column="coupon_ids" />
+        <result property="vipExclusive"         column="vip_exclusive" />
+        <result property="dataLabels"           column="data_labels" />
+        <result property="referee"              column="referee" />
+        <result property="tags"                 column="tags" />
+        <result property="wxQrCode"             column="wx_qr_code" />
+        <result property="appQrCode"            column="app_qr_code" />
+        <result property="status"               column="status" />
+        <result property="creator"              column="creator" />
+        <result property="createTime"           column="create_time" />
+        <result property="updater"              column="updater" />
+        <result property="updateTime"           column="update_time" />
+        <result property="deleted"              column="deleted" />
+    </resultMap>
+
+    <sql id="baseColumnList">
+        id, user_id, personal_title, introduction, signature, education, level,
+        is_supervisor, start_date, work_time, methods, price, consulation_addr,
+        time_base, is_accept_order, public_consultation, counselor_pepole_count,
+        sort_index, is_top, activity_priority, coupon_ids, vip_exclusive,
+        data_labels, referee, tags, wx_qr_code, app_qr_code, status,
+        creator, create_time, updater, update_time, deleted
+    </sql>
+
+    <select id="selectList" parameterType="com.qxb.consultation.domain.BizCounselorProfile" resultMap="BizCounselorProfileResult">
+        select <include refid="baseColumnList"/>
+        from public.biz_counselor_profile
+        <where>
+            deleted = '0'
+            <if test="id != null">and id = #{id}</if>
+            <if test="userId != null">and user_id = #{userId}</if>
+            <if test="personalTitle != null and personalTitle != ''">
+                and personal_title like concat('%', #{personalTitle}, '%')
+            </if>
+            <if test="education != null and education != ''">and education = #{education}</if>
+            <if test="level != null and level != ''">and level = #{level}</if>
+            <if test="isSupervisor != null and isSupervisor != ''">and is_supervisor = #{isSupervisor}</if>
+            <if test="methods != null and methods != ''">and methods like concat('%', #{methods}, '%')</if>
+            <if test="isAcceptOrder != null">and is_accept_order = #{isAcceptOrder}</if>
+            <if test="publicConsultation != null and publicConsultation != ''">
+                and public_consultation = #{publicConsultation}
+            </if>
+            <if test="isTop != null">and is_top = #{isTop}</if>
+            <if test="vipExclusive != null">and vip_exclusive = #{vipExclusive}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by sort_index desc, create_time desc
+    </select>
+
+    <select id="selectById" parameterType="Long" resultMap="BizCounselorProfileResult">
+        select <include refid="baseColumnList"/>
+        from public.biz_counselor_profile
+        where id = #{id}
+        and deleted = '0'
+    </select>
+
+    <select id="selectByUserId" parameterType="Long" resultMap="BizCounselorProfileResult">
+        select <include refid="baseColumnList"/>
+        from public.biz_counselor_profile
+        where user_id = #{userId}
+        and deleted = '0'
+        limit 1
+    </select>
+
+
+
+    <select id="selectCount" parameterType="com.qxb.consultation.domain.BizCounselorProfile" resultType="Integer">
+        select count(1)
+        from public.biz_counselor_profile
+        <where>
+            deleted = '0'
+            <if test="id != null">and id = #{id}</if>
+            <if test="userId != null">and user_id = #{userId}</if>
+            <if test="personalTitle != null and personalTitle != ''">
+                and personal_title like concat('%', #{personalTitle}, '%')
+            </if>
+            <if test="education != null and education != ''">and education = #{education}</if>
+            <if test="level != null and level != ''">and level = #{level}</if>
+            <if test="isSupervisor != null and isSupervisor != ''">and is_supervisor = #{isSupervisor}</if>
+            <if test="methods != null and methods != ''">and methods like concat('%', #{methods}, '%')</if>
+            <if test="isAcceptOrder != null">and is_accept_order = #{isAcceptOrder}</if>
+            <if test="publicConsultation != null and publicConsultation != ''">
+                and public_consultation = #{publicConsultation}
+            </if>
+            <if test="isTop != null">and is_top = #{isTop}</if>
+            <if test="vipExclusive != null">and vip_exclusive = #{vipExclusive}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+    </select>
+
+    <insert id="insertSelective" parameterType="com.qxb.consultation.domain.BizCounselorProfile" useGeneratedKeys="true" keyProperty="id">
+        insert into public.biz_counselor_profile
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="personalTitle != null">personal_title,</if>
+            <if test="introduction != null">introduction,</if>
+            <if test="signature != null">signature,</if>
+            <if test="education != null">education,</if>
+            <if test="level != null">level,</if>
+            <if test="isSupervisor != null">is_supervisor,</if>
+            <if test="startDate != null">start_date,</if>
+            <if test="workTime != null">work_time,</if>
+            <if test="methods != null">methods,</if>
+            <if test="price != null">price,</if>
+            <if test="consulationAddr != null">consulation_addr,</if>
+            <if test="timeBase != null">time_base,</if>
+            <if test="isAcceptOrder != null">is_accept_order,</if>
+            <if test="publicConsultation != null">public_consultation,</if>
+            <if test="counselorPepoleCount != null">counselor_pepole_count,</if>
+            <if test="sortIndex != null">sort_index,</if>
+            <if test="isTop != null">is_top,</if>
+            <if test="activityPriority != null">activity_priority,</if>
+            <if test="couponIds != null">coupon_ids,</if>
+            <if test="vipExclusive != null">vip_exclusive,</if>
+            <if test="dataLabels != null">data_labels,</if>
+            <if test="referee != null">referee,</if>
+            <if test="tags != null">tags,</if>
+            <if test="wxQrCode != null">wx_qr_code,</if>
+            <if test="appQrCode != null">app_qr_code,</if>
+            <if test="status != null">status,</if>
+            <if test="creator != null">creator,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updater != null">updater,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="deleted != null">deleted,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="personalTitle != null">#{personalTitle},</if>
+            <if test="introduction != null">#{introduction},</if>
+            <if test="signature != null">#{signature},</if>
+            <if test="education != null">#{education},</if>
+            <if test="level != null">#{level},</if>
+            <if test="isSupervisor != null">#{isSupervisor},</if>
+            <if test="startDate != null">#{startDate},</if>
+            <if test="workTime != null">#{workTime},</if>
+            <if test="methods != null">#{methods},</if>
+            <if test="price != null">#{price},</if>
+            <if test="consulationAddr != null">#{consulationAddr},</if>
+            <if test="timeBase != null">#{timeBase},</if>
+            <if test="isAcceptOrder != null">#{isAcceptOrder},</if>
+            <if test="publicConsultation != null">#{publicConsultation},</if>
+            <if test="counselorPepoleCount != null">#{counselorPepoleCount},</if>
+            <if test="sortIndex != null">#{sortIndex},</if>
+            <if test="isTop != null">#{isTop},</if>
+            <if test="activityPriority != null">#{activityPriority},</if>
+            <if test="couponIds != null">#{couponIds},</if>
+            <if test="vipExclusive != null">#{vipExclusive},</if>
+            <if test="dataLabels != null">#{dataLabels},</if>
+            <if test="referee != null">#{referee},</if>
+            <if test="tags != null">#{tags},</if>
+            <if test="wxQrCode != null">#{wxQrCode},</if>
+            <if test="appQrCode != null">#{appQrCode},</if>
+            <if test="status != null">#{status},</if>
+            <if test="creator != null">#{creator},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updater != null">#{updater},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="deleted != null">#{deleted},</if>
+        </trim>
+    </insert>
+
+    <update id="updateByIdSelective" parameterType="com.qxb.consultation.domain.BizCounselorProfile">
+        update public.biz_counselor_profile
+        <set>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="personalTitle != null">personal_title = #{personalTitle},</if>
+            <if test="introduction != null">introduction = #{introduction},</if>
+            <if test="signature != null">signature = #{signature},</if>
+            <if test="education != null">education = #{education},</if>
+            <if test="level != null">level = #{level},</if>
+            <if test="isSupervisor != null">is_supervisor = #{isSupervisor},</if>
+            <if test="startDate != null">start_date = #{startDate},</if>
+            <if test="workTime != null">work_time = #{workTime},</if>
+            <if test="methods != null">methods = #{methods},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="consulationAddr != null">consulation_addr = #{consulationAddr},</if>
+            <if test="timeBase != null">time_base = #{timeBase},</if>
+            <if test="isAcceptOrder != null">is_accept_order = #{isAcceptOrder},</if>
+            <if test="publicConsultation != null">public_consultation = #{publicConsultation},</if>
+            <if test="counselorPepoleCount != null">counselor_pepole_count = #{counselorPepoleCount},</if>
+            <if test="sortIndex != null">sort_index = #{sortIndex},</if>
+            <if test="isTop != null">is_top = #{isTop},</if>
+            <if test="activityPriority != null">activity_priority = #{activityPriority},</if>
+            <if test="couponIds != null">coupon_ids = #{couponIds},</if>
+            <if test="vipExclusive != null">vip_exclusive = #{vipExclusive},</if>
+            <if test="dataLabels != null">data_labels = #{dataLabels},</if>
+            <if test="referee != null">referee = #{referee},</if>
+            <if test="tags != null">tags = #{tags},</if>
+            <if test="wxQrCode != null">wx_qr_code = #{wxQrCode},</if>
+            <if test="appQrCode != null">app_qr_code = #{appQrCode},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updater != null">updater = #{updater},</if>
+            update_time = current_timestamp
+        </set>
+        where id = #{id}
+        and deleted = '0'
+    </update>
+
+    <update id="deleteById">
+        update public.biz_counselor_profile
+        set deleted = '1',
+            updater = #{updater},
+            update_time = #{updateTime}
+        where id = #{id}
+          and deleted = '0'
+    </update>
+
+</mapper>
