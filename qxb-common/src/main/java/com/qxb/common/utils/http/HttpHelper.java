@@ -50,6 +50,12 @@ public class HttpHelper
                 }
             }
         }
-        return sb.toString();
+        // 去除BOM字符
+        String result = sb.toString();
+        if (result.startsWith("\uFEFF"))
+        {
+            result = result.substring(1);
+        }
+        return result;
     }
 }
